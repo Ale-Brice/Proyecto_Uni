@@ -6,4 +6,8 @@ class Post(Base):
     id = Column(BigInteger, primary_key=True, index=True)
     nombre = Column(String, index=True)
     apellido = Column(String, index=True)
+<<<<<<< HEAD
     contrasena = Column(String, index= True)
+=======
+    
+>>>>>>> d1641e3db7eb8767eabc99a8ba0446559c4fb6a8

@@ -16,3 +16,9 @@ def login(data: inicio_sesion, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Usuario o Clave incorrectos")
 
     return {"message": f"¡Bienvenido {user.name}!", "status": "success"}
+
+from fastapi import FastAPI
+from src.core.config import settings
+from src.db import base
+
+app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
