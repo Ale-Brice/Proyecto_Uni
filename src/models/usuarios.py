@@ -6,6 +6,3 @@ class Usuario(Base):
     id = Column(BigInteger, primary_key=True, index=True)
     name = Column(String)
     contrasena = Column(String, unique=True, index=True)
-    id = Column(BigInteger, primary_key=True, index=True)
-    name = Column(String)
-    email = Column(String, unique=True, index=True)

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
-class inicio_sesion(BaseModel):
+class InicioSesion(BaseModel):
     name: str
     contrasena: str
