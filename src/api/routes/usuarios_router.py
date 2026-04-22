@@ -8,9 +8,9 @@ router = APIRouter()
 
 @router.post("/login")
 def login(data: InicioSesion, db: Session = Depends(get_db)):
-    user = obtener_usuario_por_nombre(db, data.name)
+    user = obtener_usuario_por_nombre(db, data.name, data.contrasena)
 
-    if not user or user.contrasena != data.contrasena:
+    if not user:
         raise HTTPException(status_code=400, detail="Usuario o Clave incorrectos")
 
     return {"message": f"¡Bienvenido {user.name}!", "status": "success"}
