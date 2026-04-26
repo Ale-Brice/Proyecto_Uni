@@ -5,9 +5,8 @@ from alembic import context
 import os
 from dotenv import load_dotenv
 from src.db.base_class import Base
-
 from src.models.usuarios import Usuario
-from src.models.post import Post
+from src.models.empleado import empleado
 from src.models.tag import tag
 
 
