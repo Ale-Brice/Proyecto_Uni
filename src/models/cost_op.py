@@ -4,7 +4,7 @@ from src.db.base_class import Base
 
 class cost_op(Base):
     __tablename__ = "cost_op"
-    id_materia = Column(BigInteger, primary_key=True, index=True)
+    id_materia = Column(BigInteger, primary_key=True)
     corte = Column(String, index=True)
     confeccion = Column(String, index=True)
     ojal = Column(String, index=True)
@@ -17,7 +17,7 @@ class cost_op(Base):
 
 class cost_adm(Base):
     __tablename__ = "cost_adm"
-    id_materia = Column(BigInteger, primary_key=True, index=True)
+    id_materia = Column(BigInteger, primary_key=True)
     impuestos = Column(String, index=True)
     alquiler = Column(String, index=True)
     gastos_adm = Column(String, index=True)

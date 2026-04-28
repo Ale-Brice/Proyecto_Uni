@@ -4,8 +4,8 @@ from src.db.base_class import Base
 
 class detalle_pro(Base):
     __tablename__ = "detalle_pro"
-    id_det_pro = Column(BigInteger, primary_key=True, index=True)
+    id_det_pro = Column(BigInteger, primary_key=True)
     tallas = Column(String, index=True)
-    cantidad_talla = Column(String, index=True)
+    cantidad_talla = Column(Integer, default=0)
     fk_producto = Column(BigInteger, ForeignKey("producto.id_producto"))
     #usuario_rel = relationship("Usuario", back_populates="empleado_rel")
