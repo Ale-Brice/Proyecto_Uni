@@ -7,7 +7,6 @@ class producto(Base):
     id_producto = Column(BigInteger, primary_key=True)
     nombre_p = Column(String, index=True)
     tipo_p = Column(String, index=True)
-    detalle_p = Column(String)
     precio_p = Column(DECIMAL(10, 2))
-    stock = Column(Integer, default=0)
+    cantidad = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)

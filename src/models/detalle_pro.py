@@ -8,4 +8,3 @@ class detalle_pro(Base):
     tallas = Column(String, index=True)
     cantidad_talla = Column(Integer, default=0)
     fk_producto = Column(BigInteger, ForeignKey("producto.id_producto"))
-    #usuario_rel = relationship("Usuario", back_populates="empleado_rel")
