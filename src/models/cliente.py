@@ -5,8 +5,8 @@ from src.db.base_class import Base
 class cliente(Base):
     __tablename__ = "cliente"
     id_cliente = Column(BigInteger, primary_key=True)
-    nombre = Column(String, index=True)
-    apellido = Column(String, index=True)
-    numero = Column(Integer)
-    email = Column(String)
+    nombre = Column(String, index=True, nullable=False)
+    apellido = Column(String, index=True, nullable=False)
+    numero = Column(String(20), nullable=False)
+    email = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)

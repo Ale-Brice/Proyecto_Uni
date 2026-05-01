@@ -1,13 +1,17 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.usuarios import Usuario
-from src.schemas.val_login import InicioSesion
+from sqlalchemy.future import select
 
-def obtener_usuario_por_nombre(db: Session, nombre: str, clave_proporcionada: str):
-    usuario = db.query(Usuario).filter(Usuario.name == nombre).first()
+async def obtener_usuario_por_nombre(db: AsyncSession, nombre: str, clave_proporcionada: str):
+    query = select(Usuario).where(Usuario.name == nombre)
+
+    result = await db.execute(query)
+
+    usuario = result.scalars().first()
 
     if not usuario:
         return None
 
-    if usuario.contrasena != clave_proporcionada:
+    if usuario.hashed_password != clave_proporcionada:
         return None
     return usuario
