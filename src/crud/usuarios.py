@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.exceptions import HTTPException
-from src.models.usuarios import Usuario
+from src.db.base import Usuario
 from sqlalchemy.future import select
 from passlib.context import CryptContext
 
@@ -43,3 +43,24 @@ async def delete_user1(db: AsyncSession, id):
     await db.commit()
     await db.refresh(user)
     return user
+
+async def up_user(db: AsyncSession, id: int, new_name: str, new_password: str, emp_fk: int):
+    user = await db.get(Usuario, id)
+
+    if not user:
+        return None
+
+    user.name = new_name
+    user.hashed_password = pwd_context.hash(new_password)
+    user.empleado_fk = emp_fk
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+async def obt_ususarios(db: AsyncSession, ):
+    query = select(Usuario).where(Usuario.is_active == True)
+
+    result = await db.execute(query)
+
+    usuario = result.scalars().all()
+    return usuario
