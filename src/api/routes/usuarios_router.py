@@ -5,6 +5,7 @@ from src.schemas.val_login import InicioSesion
 from src.crud.usuarios import *
 from src.schemas.val_register import registrar
 from src.schemas.get_users import UserResponse
+from src.api.deps import crear_token, verificar_token
 
 router = APIRouter()
 
@@ -15,7 +16,8 @@ async def login(data: InicioSesion, db: AsyncSession = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=400, detail="Usuario o Clave incorrectos")
 
-    return {"message": f"¡Bienvenido {user.name}!", "status": "success"}
+    token = crear_token({"sub": user.name})
+    return {"message": f"¡Bienvenido {user.name}!", "status": "success", "token": token}
 
 @router.post("/register")
 async def register(data: registrar, db: AsyncSession = Depends(get_db)):
