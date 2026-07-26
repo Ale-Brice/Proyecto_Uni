@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.post("/producto/register")
 async def register_producto(data: producto, db: AsyncSession = Depends(get_db)):
-    register = await registrar_producto(db, data.nombre_p, data.tipo_p, data.precio_p, data.cantidad)
+    register = await registrar_producto(db, data.nombre_p, data.tipo_p, data.precio_p)
 
     if not register:
         raise HTTPException(status_code=400, detail="no ha ingresado el producto")
@@ -31,8 +31,8 @@ async def delete_producto(id: int, db: AsyncSession = Depends(get_db)):
     return {"Mensaje": "Producto eliminado con exito"}
 
 @router.put("/producto/{id}")
-async def update_producto(id: int, new_nombre_p: str, new_tipo_p: str, new_precio_p: float, new_cantidad: int, db: AsyncSession = Depends(get_db)):
-    producto = await up_producto(db, id, new_nombre_p, new_tipo_p, new_precio_p, new_cantidad)
+async def update_producto(id: int, new_nombre_p: str, new_tipo_p: str, new_precio_p: float, db: AsyncSession = Depends(get_db)):
+    producto = await up_producto(db, id, new_nombre_p, new_tipo_p, new_precio_p)
 
     if not producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")

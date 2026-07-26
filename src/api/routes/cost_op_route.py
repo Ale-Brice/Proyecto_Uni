@@ -5,16 +5,17 @@ from src.db.session import get_db
 from src.schemas.val_cost_op import cost_op , costopResponse
 from sqlalchemy.future import select
 
+
 router = APIRouter()
 
 @router.post("/cost_op/register")
 async def register_cost_op(data: cost_op, db: AsyncSession = Depends(get_db)):
-    register = await registrar_cost_op(db, data.tipo_gasto_operativo, data.gasto_operativo)
+    register = await registrar_cost_op(db, data.tipo_gasto_operativo, data.gasto_operativo, data.fecha)
 
     if not register:
         raise HTTPException(status_code=400, detail="no ha ingresado el costo operativo")
 
-    return {"message": f"¡{register.gasto_operativo} Registrado con exito!", "status": "success"}
+    return {"message": f"¡Registrado con exito el gasto: {register.gasto_operativo}!", "status": "success"}
 
 @router.get("/cost_op", response_model=list[costopResponse])
 async def obtener_cost_op(db: AsyncSession = Depends(get_db)):
@@ -31,8 +32,8 @@ async def delete_cost_op(id: int, db: AsyncSession = Depends(get_db)):
     return {"Mensaje": "Costo operativo eliminado con exito"}
 
 @router.put("/cost_op/{id}")
-async def update_cost_op(id: int, new_tipo_gasto_operativo : str, new_gasto_operativo : int , db: AsyncSession = Depends(get_db)):
-    cost_op = await up_cost_op(db, id, new_tipo_gasto_operativo, new_gasto_operativo)
+async def update_cost_op(id: int, new_tipo_gasto_operativo : str, new_gasto_operativo : int , new_fecha : date, db: AsyncSession = Depends(get_db)):
+    cost_op = await up_cost_op(db, id, new_tipo_gasto_operativo, new_gasto_operativo, new_fecha)
 
     if not cost_op:
         raise HTTPException(status_code=404, detail="Costo operativo no encontrado")

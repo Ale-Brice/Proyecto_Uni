@@ -5,16 +5,16 @@ class actividad(BaseModel):
     fk_empleado: int
     fk_pedido: int
     descripcion_tarea: str
-    fecha_inicio: datetime
-    fecha_final : datetime
+    fecha_inicio: date
+    fecha_final : date
 
 class actResponse(BaseModel):
     id_actividad: int
     fk_empleado: int
     fk_pedido: int
     descripcion_tarea: str
-    fecha_inicio: datetime
-    fecha_final : datetime
+    fecha_inicio: date
+    fecha_final : date
     is_active: bool
 
     class Config:

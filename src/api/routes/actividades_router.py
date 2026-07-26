@@ -9,12 +9,12 @@ router = APIRouter()
 
 @router.post("/actividad/register")
 async def register_actividad(data: actividad, db: AsyncSession = Depends(get_db)):
-    register = await registrar_actividad(db, data.fk_empleado, data.fk_pedido, data.descripcion_tarea, data.fecha_incio, data.fecha_final)
+    register = await registrar_actividad(db, data.fk_empleado, data.fk_pedido, data.descripcion_tarea, data.fecha_inicio, data.fecha_final)
 
     if not register:
         raise HTTPException(status_code=400, detail="no ha ingresado el empleado")
 
-    return {"message": f"¡{register.nombre} Registrado con exito!", "status": "success"}
+    return {"message": f"¡Actividad registrada con exito!", "status": "success"}
 
 @router.get("/actividades", response_model=list[actResponse])
 async def obtener_actividad(db: AsyncSession = Depends(get_db)):
@@ -31,10 +31,10 @@ async def delete_actividad(id: int, db: AsyncSession = Depends(get_db)):
     return {"Mensaje": "Actividad eliminada con exito"}
 
 @router.put("/actividades/{id}")
-async def update_actividad(id: int, fk_empleado: int, fk_pedido: int, descripcion_tarea: str, fecha_incio: datetime, fecha_final: datetime, db: AsyncSession = Depends(get_db)):
-    act = await up_actividad(db, id, fk_empleado, fk_pedido, descripcion_tarea, fecha_incio, fecha_final)
+async def update_actividad(id: int, fk_empleado: int, fk_pedido: int, descripcion_tarea: str, fecha_inicio: date, fecha_final: date, db: AsyncSession = Depends(get_db)):
+    act = await up_actividad(db, id, fk_empleado, fk_pedido, descripcion_tarea, fecha_inicio, fecha_final)
 
     if not act:
-        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
 
-    return {"Mensaje": "Empleado actualizado con exito"}
+    return {"Mensaje": "Actividad actualizada con exito"}

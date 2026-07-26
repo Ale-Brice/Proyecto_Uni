@@ -8,5 +8,4 @@ class producto(Base):
     nombre_p = Column(String, index=True)
     tipo_p = Column(String, index=True)
     precio_p = Column(DECIMAL(10, 2))
-    cantidad = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)

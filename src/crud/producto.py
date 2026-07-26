@@ -3,8 +3,8 @@ from starlette.exceptions import HTTPException
 from src.db.base import producto
 from sqlalchemy.future import select
 
-async def registrar_producto(db: AsyncSession, nombre_p: str, tipo_p: str, precio_p: float, cantidad: int):
-    new_producto = producto(nombre_p=nombre_p, tipo_p=tipo_p, precio_p=precio_p, cantidad=cantidad)
+async def registrar_producto(db: AsyncSession, nombre_p: str, tipo_p: str, precio_p: float):
+    new_producto = producto(nombre_p=nombre_p, tipo_p=tipo_p, precio_p=precio_p)
     db.add(new_producto)
     await db.commit()
     await db.refresh(new_producto)
@@ -27,7 +27,7 @@ async def del_producto(db: AsyncSession, id: int):
     await db.refresh(pro)
     return pro
 
-async def up_producto(db: AsyncSession, id: int, new_nombre_p: str, new_tipo_p: str, new_precio_p: float, new_cantidad: int):
+async def up_producto(db: AsyncSession, id: int, new_nombre_p: str, new_tipo_p: str, new_precio_p: float):
     pro = await db.get(producto, id)
 
     if not producto:
@@ -36,7 +36,6 @@ async def up_producto(db: AsyncSession, id: int, new_nombre_p: str, new_tipo_p: 
     pro.nombre_p = new_nombre_p
     pro.tipo_p = new_tipo_p
     pro.precio_p = new_precio_p
-    pro.cantidad = new_cantidad
     await db.commit()
     await db.refresh(pro)
     return pro

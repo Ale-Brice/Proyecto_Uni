@@ -3,8 +3,8 @@ from starlette.exceptions import HTTPException
 from src.db.base import detalles_pedido
 from sqlalchemy.future import select
 
-async def registrar_detalle_ped(db: AsyncSession, tallas: int, cantidad: int):
-    new_detalle_ped = detalles_pedido(tallas=tallas, cantidad=cantidad)
+async def registrar_detalle_ped(db: AsyncSession, fk_pedido: int, pe_desc: str, tallas: int, cantidad: int):
+    new_detalle_ped = detalles_pedido(fk_pedido=fk_pedido, pe_desc=pe_desc, tallas=tallas, cantidad=cantidad)
     db.add(new_detalle_ped)
     await db.commit()
     await db.refresh(new_detalle_ped)
@@ -27,12 +27,13 @@ async def del_detalle_ped(db: AsyncSession, id: int):
     await db.refresh(det)
     return det
 
-async def up_detalle_ped(db: AsyncSession, id: int, new_tallas: int, new_cantidad: int):
+async def up_detalle_ped(db: AsyncSession, id: int, new_pe_desc: str, new_tallas: int, new_cantidad: int):
     det = await db.get(detalles_pedido, id)
 
-    if not detalles_pedido:
+    if not det:
         return None
 
+    det.pe_desc = new_pe_desc
     det.tallas = new_tallas
     det.cantidad = new_cantidad
     await db.commit()
