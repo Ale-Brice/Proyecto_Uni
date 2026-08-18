@@ -6,12 +6,14 @@ from src.crud.usuarios import *
 from src.schemas.val_register import registrar
 from src.schemas.get_users import UserResponse
 from src.api.deps import crear_token, verificar_token
+from fastapi.security import OAuth2PasswordRequestForm
+from typing import Annotated
 
 router = APIRouter()
 
 @router.post("/login")
-async def login(data: InicioSesion, db: AsyncSession = Depends(get_db)):
-    user = await obtener_usuario_por_nombre(db, data.name, data.contrasena)
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: AsyncSession = Depends(get_db)):
+    user = await obtener_usuario_por_nombre(db, form_data.username, form_data.password)
 
     if not user:
         raise HTTPException(status_code=400, detail="Usuario o Clave incorrectos")

@@ -4,11 +4,12 @@ from src.crud.producto import *
 from src.db.session import get_db
 from src.schemas.val_producto import producto, proResponse
 from sqlalchemy.future import select
+from src.core.audit import get_audited_db
 
 router = APIRouter()
 
 @router.post("/producto/register")
-async def register_producto(data: producto, db: AsyncSession = Depends(get_db)):
+async def register_producto(data: producto, db: AsyncSession = Depends(get_audited_db)):
     register = await registrar_producto(db, data.nombre_p, data.tipo_p, data.precio_p)
 
     if not register:

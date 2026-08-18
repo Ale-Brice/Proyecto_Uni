@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-
 class UserResponse(BaseModel):
     id: int
     name: str
@@ -9,3 +8,11 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class User(BaseModel):
+    name: str
+    is_active: bool | None = None
+
+
+class UserInDB(User):
+    hashed_password: str
