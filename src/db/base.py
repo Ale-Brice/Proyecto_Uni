@@ -16,7 +16,7 @@ from src.models.detalle_pro import detalle_pro
 
 from src.models.cost_op import cost_op, cost_adm
 
-from src.models.roles import rol, rol_usuario
+from src.models.roles import rol, rol_usuario, permiso, permiso_rol
 
 from src.models.detalles_pedido import detalles_pedido
 

@@ -12,6 +12,7 @@ from src.api.routes.actividades_router import router as actividades_router
 from src.api.routes.cost_op_route import router as cost_op_router
 from src.api.routes.detalle_pro_router import router as detalle_pro_router
 from src.api.routes.pedido_router import router as pedido_router
+from src.api.routes.cost_adm_route import router as cost_adm_router
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
 
@@ -26,3 +27,4 @@ app.include_router(detalle_pro_router, tags=["Detalles de Productos"])
 app.include_router(actividades_router, tags=["Actividades"])
 app.include_router(prueba_seguridad_router, tags=["Prueba de Seguridad"])
 app.include_router(cost_op_router, tags=["Costos Operativos"])
+app.include_router(cost_adm_router, tags=["Costos Administrativos"])

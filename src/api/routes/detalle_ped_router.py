@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.crud.detalles_pedido import *
-from src.db.session import get_db
+from src.core.audit import get_audited_db
 from src.schemas.val_detalle_ped import detalles_pedido, detpedResponse
 from sqlalchemy.future import select
 
 router = APIRouter()
 
 @router.post("/detalle_pedido/register")
-async def register_detalle_pedido(data: detalles_pedido, db: AsyncSession = Depends(get_db)):
+async def register_detalle_pedido(data: detalles_pedido, db: AsyncSession = Depends(get_audited_db)):
     register = await registrar_detalle_ped(db, fk_pedido=data.fk_pedido, pe_desc=data.pe_desc, tallas=data.tallas, cantidad=data.cantidad)
 
     if not register:
@@ -17,12 +17,12 @@ async def register_detalle_pedido(data: detalles_pedido, db: AsyncSession = Depe
     return {"message": f"¡Detalle de pedido registrado con exito!", "status": "success"}
 
 @router.get("/detalle_pedido", response_model=list[detpedResponse])
-async def obtener_detalle_pedido(db: AsyncSession = Depends(get_db)):
+async def obtener_detalle_pedido(db: AsyncSession = Depends(get_audited_db)):
     det_ped = await obt_detalle_ped(db)
     return det_ped
 
 @router.delete("/detalle_pedido/{id}")
-async def delete_detalle_pedido(id: int, db: AsyncSession = Depends(get_db)):
+async def delete_detalle_pedido(id: int, db: AsyncSession = Depends(get_audited_db)):
     detalle_ped = await del_detalle_ped(db, id)
 
     if not detalle_ped:
@@ -31,7 +31,7 @@ async def delete_detalle_pedido(id: int, db: AsyncSession = Depends(get_db)):
     return {"Mensaje": "Detalle de pedido eliminado con exito"}
 
 @router.put("/detalle_pedido/{id}")
-async def update_detalle_pedido(id: int, new_pe_desc: str, new_tallas: int, new_cantidad: int, db: AsyncSession = Depends(get_db)):
+async def update_detalle_pedido(id: int, new_pe_desc: str, new_tallas: int, new_cantidad: int, db: AsyncSession = Depends(get_audited_db)):
     detalle_ped = await up_detalle_ped(db, id, new_pe_desc, new_tallas, new_cantidad)
 
     if not detalle_ped:
