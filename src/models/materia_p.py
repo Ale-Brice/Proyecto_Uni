@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, BigInteger, ForeignKey, String, DateTime, Table, Text, DECIMAL, Integer, Boolean
+from sqlalchemy import Boolean, Column, BigInteger, ForeignKey, String, Date, DECIMAL, Integer, Boolean
 from sqlalchemy.orm import relationship
 from src.db.base_class import Base
 
@@ -8,4 +8,5 @@ class materia_p(Base):
     tipo_material = Column(String, index=True)
     precio_mat = Column(DECIMAL(10, 2))
     cantidad = Column(Integer, default=0)
+    fecha = Column(Date, index=True)
     is_active = Column(Boolean, default=True)

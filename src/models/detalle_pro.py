@@ -8,3 +8,4 @@ class detalle_pro(Base):
     tallas = Column(String, index=True)
     cantidad = Column(Integer, default=0)
     fk_producto = Column(BigInteger, ForeignKey("producto.id_producto"))
+    is_active = Column(Boolean, default=True)

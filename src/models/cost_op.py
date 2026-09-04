@@ -8,6 +8,7 @@ class cost_op(Base):
     tipo_gasto_operativo = Column(String, index=True)
     gasto_operativo = Column(DECIMAL(10, 2))
     fecha = Column(Date, index=True)
+    is_active = Column(Boolean, default=True)
 
 class cost_adm(Base):
     __tablename__ = "cost_adm"
@@ -15,3 +16,4 @@ class cost_adm(Base):
     tipo_costo = Column(String, index=True)
     gasto_administrativo = Column(DECIMAL(10, 2))
     fecha = Column(Date, index=True)
+    is_active = Column(Boolean, default=True)

@@ -5,6 +5,7 @@ from src.core.audit import get_audited_db
 from src.core.checker import PermissionChecker
 from src.schemas.val_materia_p import materia_p, matResponse
 from sqlalchemy.future import select
+from datetime import date
 
 require_create = PermissionChecker(["crear"])
 require_delete = PermissionChecker(["delete"])
@@ -15,7 +16,7 @@ router = APIRouter()
 
 @router.post("/materia_prima/register")
 async def register_materia_p(data: materia_p, db: AsyncSession = Depends(get_audited_db), user = Depends(require_create)):
-    register = await registrar_materia_p(db, data.tipo_material, data.precio_mat, data.cantidad)
+    register = await registrar_materia_p(db, data.tipo_material, data.precio_mat, data.cantidad, data.fecha)
 
     if not register:
         raise HTTPException(status_code=400, detail="no ha ingresado la materia prima")
@@ -37,8 +38,8 @@ async def delete_materia_p(id: int, db: AsyncSession = Depends(get_audited_db), 
     return {"Mensaje": "Materia prima eliminada con exito"}
 
 @router.put("/materia_prima/{id}")
-async def update_materia_p(id: int, new_tipo_material: str, new_precio_mat: float, new_cantidad: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
-    materia_p = await up_materia_p(db, id, new_tipo_material, new_precio_mat, new_cantidad)
+async def update_materia_p(id: int, new_tipo_material: str, new_precio_mat: float, new_cantidad: int, new_fecha: date, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    materia_p = await up_materia_p(db, id, new_tipo_material, new_precio_mat, new_cantidad, new_fecha)
 
     if not materia_p:
         raise HTTPException(status_code=404, detail="Materia prima no encontrada")
