@@ -7,11 +7,8 @@ from src.crud.gastos import obt_cost_adm_mes
 from src.crud.gastos import obt_cost_op_mes
 from src.crud.gastos import obt_materia_p_mes
 from src.db.session import get_db
+from src.crud.ventas import obt_ventas_mes
 from src.db.base import cost_adm, cost_op, materia_p
-
-# Importa tus dependencias y cruds
-# from src.api.deps import get_db
-# from src.crud import cost_adm, cost_op, materia_p
 
 router = APIRouter()
 
@@ -21,15 +18,18 @@ async def generar_reporte_mensual(year: int, month: int, db: AsyncSession = Depe
     admin_costs = await obt_cost_adm_mes(db, year, month)
     oper_costs = await obt_cost_op_mes(db, year, month)
     materias = await obt_materia_p_mes(db, year, month)
+    ventas_mes = await obt_ventas_mes(db, year, month)
 
 
     total_adm = sum(c.gasto_administrativo for c in admin_costs)
     total_op = sum(c.gasto_operativo for c in oper_costs)
+    total_ingresos = sum(v.precio_p * v.cantidad for v in ventas_mes)
 
     # Para materia prima, el costo es precio * cantidad
     total_mat = sum((m.precio_mat * m.cantidad) for m in materias)
 
     gran_total = total_adm + total_op + total_mat
+    ganancia_neta = total_ingresos - gran_total
 
     # 3. Preparar la plantilla HTML (versión simplificada)
     html_template = """
@@ -84,6 +84,37 @@ async def generar_reporte_mensual(year: int, month: int, db: AsyncSession = Depe
             </tr>
             {% endfor %}
         </table>
+        <h3>Ventas del Mes</h3>
+        <table>
+            <tr>
+                <th>Fecha</th>
+                <th>ID Producto</th>
+                <th>Precio Unit.</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+            </tr>
+            {% for v in ventas_mes %}
+            <tr>
+                <td>{{ v.fecha }}</td>
+                <td>{{ v.fk_producto }}</td>
+                <td>${{ v.precio_p }}</td>
+                <td>{{ v.cantidad }}</td>
+                <td>${{ v.precio_p * v.cantidad }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Cuadro de Resumen Financiero -->
+        <div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 5px;">
+            <h2>Resumen Financiero del Mes</h2>
+            <p style="font-size: 16px;"><strong>Total Ingresos:</strong> ${{ total_ingresos }}</p>
+            <p style="font-size: 16px;"><strong>Total Gastos (Adm + Op + Materia):</strong> ${{ gran_total }}</p>
+
+            <!-- El color cambia a rojo si hay pérdidas, y verde si hay ganancias -->
+            <h3 style="color: {% if ganancia_neta >= 0 %}#28a745{% else %}#dc3545{% endif %};">
+                Ganancia Neta: ${{ ganancia_neta }}
+            </h3>
+        </div>
     </body>
     </html>
     """
@@ -93,7 +124,8 @@ async def generar_reporte_mensual(year: int, month: int, db: AsyncSession = Depe
     html_content = template.render(
         mes=month, anio=year,
         admin_costs=admin_costs, oper_costs=oper_costs, materias=materias,
-        total_adm=total_adm, total_op=total_op, total_mat=total_mat, gran_total=gran_total
+        total_adm=total_adm, total_op=total_op, total_mat=total_mat, gran_total=gran_total,
+        total_ingresos=total_ingresos, ganancia_neta=ganancia_neta, ventas_mes=ventas_mes
     )
 
     pdf_bytes = HTML(string=html_content).write_pdf()

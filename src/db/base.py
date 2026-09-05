@@ -23,3 +23,5 @@ from src.models.detalles_pedido import detalles_pedido
 from src.models.detalle_pro import detalle_pro
 
 from src.models.actividades import actividad
+
+from src.models.ganancias import ventas
