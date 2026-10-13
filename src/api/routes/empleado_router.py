@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.crud.empleados import *
 from src.core.audit import get_audited_db
 from src.core.checker import PermissionChecker
-from src.schemas.val_empleado import empleado, EmpResponse
+from src.schemas.val_empleado import *
 from sqlalchemy.future import select
 
 require_create = PermissionChecker(["crear"])
@@ -37,9 +37,26 @@ async def delete_empleado(id: int, db: AsyncSession = Depends(get_audited_db), u
     return {"Mensaje": "Empleado eliminado con exito"}
 
 @router.put("/empleados/{id}")
-async def update_empleado(id: int, new_name: str, apellido: str, numero: str, email: str, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+async def update_empleado_complete(id: int, new_name: str, apellido: str, numero: str, email: str, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
     emp = await up_empleado(db, id, new_name, apellido, numero, email)
 
+    if not emp:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+
+    return {"Mensaje": "Empleado actualizado con exito"}
+
+@router.patch("/empleados/{id}")
+async def update_empleado_parcial(id: int, emp_data: EmpPartial, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    update_data = emp_data.model_dump(exclude_unset=True)
+
+    emp = await update_empleado(
+        db=db,
+        id=id,
+        nombre=update_data.get("nombre"),
+        apellido=update_data.get("apellido"),
+        numero=update_data.get("numero"),
+        email=update_data.get("email")
+    )
     if not emp:
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
 

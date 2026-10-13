@@ -40,3 +40,17 @@ async def up_cost_adm(db: AsyncSession, id: int, new_tipo_costo: str, new_gasto_
     await db.commit()
     await db.refresh(cost)
     return cost
+
+async def update_cost_admP(db: AsyncSession, id: int, tipo_costo: str, gasto_administrativo: int, fecha: date):
+    cost = await db.get(cost_adm, id)
+    if not cost:
+        return None
+    if tipo_costo is not None:
+        cost.tipo_costo = tipo_costo
+    if gasto_administrativo is not None:
+        cost.gasto_administrativo = gasto_administrativo
+    if fecha is not None:
+        cost.fecha = fecha
+    await db.commit()
+    await db.refresh(cost)
+    return cost

@@ -17,3 +17,9 @@ class ventaResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ventaPartial(BaseModel):
+    fk_producto: int | None = None
+    precio_p: float | None = None
+    cantidad: int | None = None
+    fecha: date | None = None

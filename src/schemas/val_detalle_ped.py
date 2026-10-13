@@ -16,3 +16,9 @@ class detpedResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class detpedPartial(BaseModel):
+    fk_pedido: int | None = None
+    pe_desc: str | None = None
+    tallas: int | None = None
+    cantidad: int | None = None

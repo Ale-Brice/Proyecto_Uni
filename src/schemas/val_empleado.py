@@ -16,3 +16,9 @@ class EmpResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class EmpPartial(BaseModel):
+    nombre: str | None = None
+    apellido: str | None = None
+    numero: str | None = None
+    email: str | None = None

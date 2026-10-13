@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.crud.ventas import *
 from src.core.audit import get_audited_db
 from src.core.checker import PermissionChecker
-from src.schemas.val_ventas import venta, ventaResponse
+from src.schemas.val_ventas import *
 from sqlalchemy.future import select
 
 require_create = PermissionChecker(["crear"])
@@ -40,6 +40,23 @@ async def delete_venta(id: int, db: AsyncSession = Depends(get_audited_db), user
 async def update_venta(id: int, fk_producto: int, precio_p: float, cantidad: int, fecha: date, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
     act = await up_venta(db, id, fk_producto, precio_p, cantidad, fecha)
 
+    if not act:
+        raise HTTPException(status_code=404, detail="Venta no encontrada")
+
+    return {"Mensaje": "Venta actualizada con exito"}
+
+@router.patch("/ventas/{id}")
+async def update_venta_parcial(id: int, venta_data: ventaPartial, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    update_data = venta_data.model_dump(exclude_unset=True)
+
+    act = await update_ventaP(
+        db=db,
+        id=id,
+        fk_producto=update_data.get("fk_producto"),
+        precio_p=update_data.get("precio_p"),
+        cantidad=update_data.get("cantidad"),
+        fecha=update_data.get("fecha")
+    )
     if not act:
         raise HTTPException(status_code=404, detail="Venta no encontrada")
 

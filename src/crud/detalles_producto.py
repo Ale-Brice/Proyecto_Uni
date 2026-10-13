@@ -30,12 +30,26 @@ async def del_detalle_pro(db: AsyncSession, id: int):
 async def up_detalle_pro(db: AsyncSession, id: int, new_tallas: str, new_cantidad: int, new_fk_pro: int,):
     det = await db.get(detalle_pro, id)
 
-    if not detalle_pro:
+    if not det:
         return None
 
     det.tallas = new_tallas
     det.cantidad = new_cantidad
     det.fk_producto = new_fk_pro
+    await db.commit()
+    await db.refresh(det)
+    return det
+
+async def update_detalle_pro(db: AsyncSession, id: int, tallas: str, cantidad: int, fk_producto: int):
+    det = await db.get(detalle_pro, id)
+    if not det:
+        return None
+    if tallas is not None:
+        det.tallas = tallas
+    if cantidad is not None:
+        det.cantidad = cantidad
+    if fk_producto is not None:
+        det.fk_producto = fk_producto
     await db.commit()
     await db.refresh(det)
     return det

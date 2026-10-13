@@ -12,3 +12,7 @@ class pedResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class pedPartial(BaseModel):
+    fk_cliente: int | None = None
+    fk_producto: int | None = None

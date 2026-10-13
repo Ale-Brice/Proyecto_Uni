@@ -11,6 +11,12 @@ class costopResponse(BaseModel):
     tipo_gasto_operativo: str
     gasto_operativo: int
     fecha: date
+    is_active: bool
 
     class Config:
         from_attributes = True
+
+class costopPartial(BaseModel):
+    tipo_gasto_operativo: str | None = None
+    gasto_operativo: int | None = None
+    fecha: date | None = None

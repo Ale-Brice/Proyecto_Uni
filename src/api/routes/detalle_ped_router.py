@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.crud.detalles_pedido import *
 from src.core.audit import get_audited_db
 from src.core.checker import PermissionChecker
-from src.schemas.val_detalle_ped import detalles_pedido, detpedResponse
+from src.schemas.val_detalle_ped import *
 from sqlalchemy.future import select
 
 require_create = PermissionChecker(["crear"])
@@ -40,6 +40,23 @@ async def delete_detalle_pedido(id: int, db: AsyncSession = Depends(get_audited_
 async def update_detalle_pedido(id: int, new_pe_desc: str, new_tallas: int, new_cantidad: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
     detalle_ped = await up_detalle_ped(db, id, new_pe_desc, new_tallas, new_cantidad)
 
+    if not detalle_ped:
+        raise HTTPException(status_code=404, detail="Detalle de pedido no encontrado")
+
+    return {"Mensaje": "Detalle de pedido actualizado con exito"}
+
+@router.patch("/detalle_pedido/{id}")
+async def update_detalle_pedido_parcial(id: int, det_data: detpedPartial, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    update_data = det_data.model_dump(exclude_unset=True)
+
+    detalle_ped = await update_detalle_pedP(
+        db=db,
+        id=id,
+        fk_pedido=update_data.get("fk_pedido"),
+        pe_desc=update_data.get("pe_desc"),
+        tallas=update_data.get("tallas"),
+        cantidad=update_data.get("cantidad")
+    )
     if not detalle_ped:
         raise HTTPException(status_code=404, detail="Detalle de pedido no encontrado")
 

@@ -39,3 +39,15 @@ async def up_pedido(db: AsyncSession, id: int, new_fk_cliente: int, new_fk_produ
     await db.commit()
     await db.refresh(pedido)
     return pedido
+
+async def update_pedidoP(db: AsyncSession, id: int, fk_cliente: int | None, fk_producto: int | None):
+    ped = await db.get(pedido, id)
+    if not ped:
+        return None
+    if fk_cliente is not None:
+        ped.fk_cliente = fk_cliente
+    if fk_producto is not None:
+        ped.fk_producto = fk_producto
+    await db.commit()
+    await db.refresh(ped)
+    return ped

@@ -17,3 +17,9 @@ class matResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class matPartial(BaseModel):
+    tipo_material: str | None = None
+    precio_mat: float | None = None
+    cantidad: int | None = None
+    fecha: date | None = None

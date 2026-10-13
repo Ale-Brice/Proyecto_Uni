@@ -40,3 +40,19 @@ async def up_empleado(db: AsyncSession, id: int, new_name: str, apellido: str, n
     await db.commit()
     await db.refresh(emp)
     return emp
+
+async def update_empleado(db: AsyncSession, id: int, nombre: str, apellido: str, numero: str, email: str):
+    emp = await db.get(empleado, id)
+    if not emp:
+        return None
+    if nombre is not None:
+        emp.nombre = nombre
+    if apellido is not None:
+        emp.apellido = apellido
+    if numero is not None:
+        emp.numero = numero
+    if email is not None:
+        emp.email = email
+    await db.commit()
+    await db.refresh(emp)
+    return emp

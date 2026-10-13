@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.crud.producto import *
 from src.db.session import get_db
-from src.schemas.val_producto import producto, proResponse
+from src.schemas.val_producto import *
 from sqlalchemy.future import select
 from src.core.audit import get_audited_db
 from src.core.checker import PermissionChecker
@@ -42,6 +42,22 @@ async def update_producto(id: int, new_nombre_p: str, new_tipo_p: str, new_preci
     producto = await up_producto(db, id, new_nombre_p, new_tipo_p, new_precio_p)
 
     if not producto:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+    return {"Mensaje": "Producto actualizado con exito"}
+
+@router.patch("/producto/{id}")
+async def update_producto_parcial(id: int, prod_data: proPartial, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    update_data = prod_data.model_dump(exclude_unset=True)
+
+    prod = await update_productoP(
+        db=db,
+        id=id,
+        nombre_p=update_data.get("nombre_p"),
+        tipo_p=update_data.get("tipo_p"),
+        precio_p=update_data.get("precio_p")
+    )
+    if not prod:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
 
     return {"Mensaje": "Producto actualizado con exito"}

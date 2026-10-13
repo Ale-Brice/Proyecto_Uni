@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.crud.materia_p import *
 from src.core.audit import get_audited_db
 from src.core.checker import PermissionChecker
-from src.schemas.val_materia_p import materia_p, matResponse
+from src.schemas.val_materia_p import *
 from sqlalchemy.future import select
 from datetime import date
 
@@ -41,6 +41,23 @@ async def delete_materia_p(id: int, db: AsyncSession = Depends(get_audited_db), 
 async def update_materia_p(id: int, new_tipo_material: str, new_precio_mat: float, new_cantidad: int, new_fecha: date, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
     materia_p = await up_materia_p(db, id, new_tipo_material, new_precio_mat, new_cantidad, new_fecha)
 
+    if not materia_p:
+        raise HTTPException(status_code=404, detail="Materia prima no encontrada")
+
+    return {"Mensaje": "Materia prima actualizada con exito"}
+
+@router.patch("/materia_prima/{id}")
+async def update_materia_p_parcial(id: int, mat_data: matPartial, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    update_data = mat_data.model_dump(exclude_unset=True)
+
+    materia_p = await update_materia_pP(
+        db=db,
+        id=id,
+        tipo_material=update_data.get("tipo_material"),
+        precio_mat=update_data.get("precio_mat"),
+        cantidad=update_data.get("cantidad"),
+        fecha=update_data.get("fecha")
+    )
     if not materia_p:
         raise HTTPException(status_code=404, detail="Materia prima no encontrada")
 

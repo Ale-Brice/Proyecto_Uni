@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.crud.clientes import *
 from src.core.audit import get_audited_db
 from src.core.checker import PermissionChecker
-from src.schemas.val_cliente import cliente, cliResponse
+from src.schemas.val_cliente import *
 from sqlalchemy.future import select
 
 require_create = PermissionChecker(["crear"])
@@ -41,6 +41,23 @@ async def update_cliente(id: int, new_name: str, apellido: str, numero: str, ema
     cliente = await up_cliente(db, id, new_name, apellido, numero, email)
 
     if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+
+    return {"Mensaje": "Cliente actualizado con exito"}
+
+@router.patch("/clientes/{id}")
+async def update_cliente_parcial(id: int, cli_data: cliPartial, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    update_data = cli_data.model_dump(exclude_unset=True)
+
+    cli = await update_clienteP(
+        db=db,
+        id=id,
+        nombre=update_data.get("nombre"),
+        apellido=update_data.get("apellido"),
+        numero=update_data.get("numero"),
+        email=update_data.get("email")
+    )
+    if not cli:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
 
     return {"Mensaje": "Cliente actualizado con exito"}

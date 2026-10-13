@@ -39,3 +39,17 @@ async def up_producto(db: AsyncSession, id: int, new_nombre_p: str, new_tipo_p: 
     await db.commit()
     await db.refresh(pro)
     return pro
+
+async def update_productoP(db: AsyncSession, id: int, nombre_p: str, tipo_p: str, precio_p: float):
+    prod = await db.get(producto, id)
+    if not prod:
+        return None
+    if nombre_p is not None:
+        prod.nombre_p = nombre_p
+    if tipo_p is not None:
+        prod.tipo_p = tipo_p
+    if precio_p is not None:
+        prod.precio_p = precio_p
+    await db.commit()
+    await db.refresh(prod)
+    return prod

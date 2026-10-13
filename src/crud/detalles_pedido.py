@@ -39,3 +39,19 @@ async def up_detalle_ped(db: AsyncSession, id: int, new_pe_desc: str, new_tallas
     await db.commit()
     await db.refresh(det)
     return det
+
+async def update_detalle_pedP(db: AsyncSession, id: int, fk_pedido: int | None, pe_desc: str | None, tallas: int | None, cantidad: int | None):
+    det = await db.get(detalles_pedido, id)
+    if not det:
+        return None
+    if fk_pedido is not None:
+        det.fk_pedido = fk_pedido
+    if pe_desc is not None:
+        det.pe_desc = pe_desc
+    if tallas is not None:
+        det.tallas = tallas
+    if cantidad is not None:
+        det.cantidad = cantidad
+    await db.commit()
+    await db.refresh(det)
+    return det

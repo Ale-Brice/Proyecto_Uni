@@ -19,3 +19,10 @@ class actResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ActividadPartial(BaseModel):
+    fk_empleado: int | None = None
+    fk_pedido: int | None = None
+    descripcion_tarea: str | None = None
+    fecha_inicio: date | None = None
+    fecha_final: date | None = None

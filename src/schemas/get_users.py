@@ -16,3 +16,8 @@ class User(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
+
+class UserPartial(BaseModel):
+    name: str | None = None
+    password: str | None = None
+    emp_fk: int | None = None

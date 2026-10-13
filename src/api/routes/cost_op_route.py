@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.crud.cost_op import *
 from src.core.audit import get_audited_db
 from src.core.checker import PermissionChecker
-from src.schemas.val_cost_op import cost_op , costopResponse
+from src.schemas.val_cost_op import *
 from sqlalchemy.future import select
 
 require_create = PermissionChecker(["crear"])
@@ -40,6 +40,22 @@ async def delete_cost_op(id: int, db: AsyncSession = Depends(get_audited_db), us
 async def update_cost_op(id: int, new_tipo_gasto_operativo : str, new_gasto_operativo : int , new_fecha : date, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
     cost_op = await up_cost_op(db, id, new_tipo_gasto_operativo, new_gasto_operativo, new_fecha)
 
+    if not cost_op:
+        raise HTTPException(status_code=404, detail="Costo operativo no encontrado")
+
+    return {"Mensaje": "Costo operativo actualizado con exito"}
+
+@router.patch("/cost_op/{id}")
+async def update_cost_op_parcial(id: int, cost_op_data: costopPartial, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    update_data = cost_op_data.model_dump(exclude_unset=True)
+
+    cost_op = await update_cost_opP(
+        db=db,
+        id=id,
+        tipo_gasto_operativo=update_data.get("tipo_gasto_operativo"),
+        gasto_operativo=update_data.get("gasto_operativo"),
+        fecha=update_data.get("fecha")
+    )
     if not cost_op:
         raise HTTPException(status_code=404, detail="Costo operativo no encontrado")
 

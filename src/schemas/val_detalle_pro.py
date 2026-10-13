@@ -16,3 +16,8 @@ class detproResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class detproPartial(BaseModel):
+    tallas: str | None = None
+    cantidad: int | None = None
+    fk_producto: int | None = None

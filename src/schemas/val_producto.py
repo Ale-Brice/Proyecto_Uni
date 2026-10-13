@@ -14,3 +14,8 @@ class proResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class proPartial(BaseModel):
+    nombre_p: str | None = None
+    tipo_p: str | None = None
+    precio_p: float | None = None

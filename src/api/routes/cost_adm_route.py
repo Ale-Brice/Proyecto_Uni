@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.crud.cost_adm import registrar_cost_adm, obt_cost_adm, del_cost_adm, up_cost_adm
+from src.crud.cost_adm import *
 from src.core.audit import get_audited_db
 from src.core.checker import PermissionChecker
-from src.schemas.val_cost_adm import cost_adm , costadmResponse
+from src.schemas.val_cost_adm import *
 from sqlalchemy.future import select
 from datetime import date
 
@@ -41,6 +41,22 @@ async def delete_cost_adm(id: int, db: AsyncSession = Depends(get_audited_db), u
 async def update_cost_adm(id: int, new_tipo_costo : str, new_gasto_administrativo : int , new_fecha : date, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
     cost_adm = await up_cost_adm(db, id, new_tipo_costo, new_gasto_administrativo, new_fecha)
 
+    if not cost_adm:
+        raise HTTPException(status_code=404, detail="Costo administrativo no encontrado")
+
+    return {"Mensaje": "Costo administrativo actualizado con exito"}
+
+@router.patch("/cost_adm/{id}")
+async def update_cost_adm_parcial(id: int, cost_data: costadmPartial, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    update_data = cost_data.model_dump(exclude_unset=True)
+
+    cost_adm = await update_cost_admP(
+        db=db,
+        id=id,
+        tipo_costo=update_data.get("tipo_costo"),
+        gasto_administrativo=update_data.get("gasto_administrativo"),
+        fecha=update_data.get("fecha")
+    )
     if not cost_adm:
         raise HTTPException(status_code=404, detail="Costo administrativo no encontrado")
 

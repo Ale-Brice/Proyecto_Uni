@@ -1,7 +1,6 @@
 from sqlalchemy import select, extract
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models.ganancias import ventas
-from src.db.base import actividad
+from src.db.base import ventas
 from sqlalchemy.future import select
 from datetime import date, datetime
 
@@ -24,8 +23,8 @@ async def registrar_venta(db: AsyncSession, fk_producto: int, precio_p: float, c
 async def obt_ventas(db: AsyncSession):
     query = select(ventas).where(ventas.is_active == True)
     result = await db.execute(query)
-    ventas = result.scalars().all()
-    return ventas
+    ven = result.scalars().all()
+    return ven
 
 async def delventa(db: AsyncSession, id: int):
     act = await db.get(ventas, id)
@@ -39,15 +38,31 @@ async def delventa(db: AsyncSession, id: int):
     return act
 
 async def up_venta(db: AsyncSession, id: int, new_fk_producto=int, new_precio_p=float, new_cantidad=int, new_fecha=date):
-    act = await db.get(ventas, id)
+    ven = await db.get(ventas, id)
 
-    if not act:
+    if not ven:
         return None
 
-    act.fk_producto = new_fk_producto
-    act.precio_p = new_precio_p
-    act.cantidad = new_cantidad
-    act.fecha = new_fecha
+    ven.fk_producto = new_fk_producto
+    ven.precio_p = new_precio_p
+    ven.cantidad = new_cantidad
+    ven.fecha = new_fecha
     await db.commit()
-    await db.refresh(act)
-    return act
+    await db.refresh(ven)
+    return ven
+
+async def update_ventaP(db: AsyncSession, id: int, fk_producto: int | None = None, precio_p: float | None = None, cantidad: int | None = None, fecha: date | None = None):
+    ven = await db.get(ventas, id)
+    if not ven:
+        return None
+    if fk_producto is not None:
+        ven.fk_producto = fk_producto
+    if precio_p is not None:
+        ven.precio_p = precio_p
+    if cantidad is not None:
+        ven.cantidad = cantidad
+    if fecha is not None:
+        ven.fecha = fecha
+    await db.commit()
+    await db.refresh(ven)
+    return ven

@@ -4,7 +4,7 @@ from src.db.session import get_db
 from src.schemas.val_login import InicioSesion
 from src.crud.usuarios import *
 from src.schemas.val_register import registrar
-from src.schemas.get_users import UserResponse
+from src.schemas.get_users import *
 from src.api.deps import crear_token, verificar_token
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
@@ -28,7 +28,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: 
     return {"message": f"¡Bienvenido {user.name}!", "status": "success", "token": token}
 
 @router.post("/register")
-async def register(data: registrar, db: AsyncSession = Depends(get_db), user = Depends(require_create)):
+async def register(data: registrar, db: AsyncSession = Depends(get_db)):
     register = await registrar_usuario(db, data.name, data.contraseña)
 
     if not register:
@@ -52,9 +52,25 @@ async def delete_user(id: int, db: AsyncSession = Depends(get_db), user = Depend
     return {"Mensaje": "Usuario eliminado con exito"}
 
 @router.put("/usuarios/{id}")
-async def update_user(id: int, new_name: str, new_password: str, emp_fk: int, db: AsyncSession = Depends(get_db), user = Depends(require_update)):
+async def update_user_complete(id: int, new_name: str, new_password: str, emp_fk: int, db: AsyncSession = Depends(get_db), user = Depends(require_update)):
     user = await up_user(db, id, new_name, new_password, emp_fk)
 
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    return {"Mensaje": "Usuario actualizado con exito"}
+
+@router.patch("/usuarios/{id}")
+async def update_user_partial(id: int, user_data: UserPartial, db: AsyncSession = Depends(get_db)):
+    update_data = user_data.model_dump(exclude_unset=True)
+
+    user = await update_user(
+        db=db,
+        id=id,
+        name=update_data.get("name"),
+        password=update_data.get("password"),
+        emp_fk=update_data.get("emp_fk")
+    )
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 

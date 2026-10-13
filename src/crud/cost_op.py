@@ -40,3 +40,17 @@ async def up_cost_op(db: AsyncSession, id: int, new_tipo_gasto_operativo: str, n
     await db.commit()
     await db.refresh(cost)
     return cost
+
+async def update_cost_opP(db: AsyncSession, id: int, tipo_gasto_operativo: str | None = None, gasto_operativo: int | None = None, fecha: date | None = None):
+    cost = await db.get(cost_op, id)
+    if not cost:
+        return None
+    if tipo_gasto_operativo is not None:
+        cost.tipo_gasto_operativo = tipo_gasto_operativo
+    if gasto_operativo is not None:
+        cost.gasto_operativo = gasto_operativo
+    if fecha is not None:
+        cost.fecha = fecha
+    await db.commit()
+    await db.refresh(cost)
+    return cost

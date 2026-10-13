@@ -41,3 +41,19 @@ async def up_materia_p(db: AsyncSession, id: int, new_tipo_material: str, new_pr
     await db.commit()
     await db.refresh(mat)
     return mat
+
+async def update_materia_pP(db: AsyncSession, id: int, tipo_material: str | None, precio_mat: float | None, cantidad: int | None, fecha: date | None):
+    mat = await db.get(materia_p, id)
+    if not mat:
+        return None
+    if tipo_material is not None:
+        mat.tipo_material = tipo_material
+    if precio_mat is not None:
+        mat.precio_mat = precio_mat
+    if cantidad is not None:
+        mat.cantidad = cantidad
+    if fecha is not None:
+        mat.fecha = fecha
+    await db.commit()
+    await db.refresh(mat)
+    return mat

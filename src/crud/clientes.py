@@ -40,3 +40,19 @@ async def up_cliente(db: AsyncSession, id: int, new_name: str, apellido: str, nu
     await db.commit()
     await db.refresh(cli)
     return cli
+
+async def update_clienteP(db: AsyncSession, id: int, nombre: str, apellido: str, numero: str, email: str):
+    cli = await db.get(cliente, id)
+    if not cli:
+        return None
+    if nombre is not None:
+        cli.nombre = nombre
+    if apellido is not None:
+        cli.apellido = apellido
+    if numero is not None:
+        cli.numero = numero
+    if email is not None:
+        cli.email = email
+    await db.commit()
+    await db.refresh(cli)
+    return cli

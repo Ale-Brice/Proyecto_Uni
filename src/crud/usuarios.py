@@ -57,6 +57,20 @@ async def up_user(db: AsyncSession, id: int, new_name: str, new_password: str, e
     await db.refresh(user)
     return user
 
+async def update_user(db: AsyncSession, id: int, name: str, password: str, emp_fk: int):
+    user = await db.get(Usuario, id)
+    if not user:
+        return None
+    if name is not None:
+        user.name = name
+    if password is not None:
+        user.hashed_password = pwd_context.hash(password)
+    if emp_fk is not None:
+        user.empleado_fk = emp_fk
+    await db.commit()
+    await db.refresh(user)
+    return user
+
 async def obt_ususarios(db: AsyncSession, ):
     query = select(Usuario).where(Usuario.is_active == True)
 

@@ -42,3 +42,21 @@ async def up_actividad(db: AsyncSession, id: int, new_fk_empleado=int, new_fk_pe
     await db.commit()
     await db.refresh(act)
     return act
+
+async def update_actividadP(db: AsyncSession, id: int, fk_empleado: int | None = None, fk_pedido: int | None = None, descripcion_tarea: str | None = None, fecha_inicio: date | None = None, fecha_final: date | None = None):
+    act = await db.get(actividad, id)
+    if not act:
+        return None
+    if fk_empleado is not None:
+        act.fk_empleado = fk_empleado
+    if fk_pedido is not None:
+        act.fk_pedido = fk_pedido
+    if descripcion_tarea is not None:
+        act.descripcion_tarea = descripcion_tarea
+    if fecha_inicio is not None:
+        act.fecha_inicio = fecha_inicio
+    if fecha_final is not None:
+        act.fecha_final = fecha_final
+    await db.commit()
+    await db.refresh(act)
+    return act

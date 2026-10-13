@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.crud.actividades import *
 from src.core.audit import get_audited_db
 from src.core.checker import PermissionChecker
-from src.schemas.val_actividades import actividad,actResponse
+from src.schemas.val_actividades import *
 from sqlalchemy.future import select
 
 require_create = PermissionChecker(["crear"])
@@ -40,6 +40,24 @@ async def delete_actividad(id: int, db: AsyncSession = Depends(get_audited_db), 
 async def update_actividad(id: int, fk_empleado: int, fk_pedido: int, descripcion_tarea: str, fecha_inicio: date, fecha_final: date, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
     act = await up_actividad(db, id, fk_empleado, fk_pedido, descripcion_tarea, fecha_inicio, fecha_final)
 
+    if not act:
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+
+    return {"Mensaje": "Actividad actualizada con exito"}
+
+@router.patch("/actividades/{id}")
+async def update_actividad_parcial(id: int, act_data: ActividadPartial, db: AsyncSession = Depends(get_audited_db)):
+    update_data = act_data.model_dump(exclude_unset=True)
+
+    act = await update_actividadP(
+        db=db,
+        id=id,
+        fk_empleado=update_data.get("fk_empleado"),
+        fk_pedido=update_data.get("fk_pedido"),
+        descripcion_tarea=update_data.get("descripcion_tarea"),
+        fecha_inicio=update_data.get("fecha_inicio"),
+        fecha_final=update_data.get("fecha_final")
+    )
     if not act:
         raise HTTPException(status_code=404, detail="Actividad no encontrada")
 
