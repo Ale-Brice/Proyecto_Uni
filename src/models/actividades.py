@@ -9,5 +9,5 @@ class actividad(Base):
     fk_pedido = Column(BigInteger, ForeignKey("pedido.id_pedido"))
     descripcion_tarea = Column(String, index=True)
     fecha_inicio = Column(Date, index=True)
-    fecha_final = Column(Date, index=True)
+    fecha_final = Column(Date, index=True, nullable=True)
     is_active = Column(Boolean, default=True)

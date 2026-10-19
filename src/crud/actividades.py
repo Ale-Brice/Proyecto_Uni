@@ -4,8 +4,8 @@ from src.db.base import actividad
 from sqlalchemy.future import select
 from datetime import date, datetime
 
-async def registrar_actividad(db: AsyncSession, fk_empleado: int, fk_pedido: int, descripcion_tarea: str, fecha_inicio: datetime, fecha_final: datetime):
-    new_actividad = actividad(fk_empleado=fk_empleado, fk_pedido=fk_pedido, descripcion_tarea=descripcion_tarea, fecha_inicio=fecha_inicio, fecha_final=fecha_final)
+async def registrar_actividad(db: AsyncSession, fk_empleado: int, fk_pedido: int, descripcion_tarea: str, fecha_inicio: datetime):
+    new_actividad = actividad(fk_empleado=fk_empleado, fk_pedido=fk_pedido, descripcion_tarea=descripcion_tarea, fecha_inicio=fecha_inicio)
     db.add(new_actividad)
     await db.commit()
     await db.refresh(new_actividad)
@@ -24,6 +24,17 @@ async def delactividad(db: AsyncSession, id: int):
         return act
 
     act.is_active = False
+    await db.commit()
+    await db.refresh(act)
+    return act
+
+async def finalizarAct(db: AsyncSession, id: int):
+    act = await db.get(actividad, id)
+
+    if not act:
+        return act
+
+    act.fecha_final = datetime.now().date()
     await db.commit()
     await db.refresh(act)
     return act

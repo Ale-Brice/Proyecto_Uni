@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.post("/actividad/register")
 async def register_actividad(data: actividad, db: AsyncSession = Depends(get_audited_db), user = Depends(require_create)):
-    register = await registrar_actividad(db, data.fk_empleado, data.fk_pedido, data.descripcion_tarea, data.fecha_inicio, data.fecha_final)
+    register = await registrar_actividad(db, data.fk_empleado, data.fk_pedido, data.descripcion_tarea, data.fecha_inicio)
 
     if not register:
         raise HTTPException(status_code=400, detail="no ha ingresado el empleado")
@@ -62,3 +62,12 @@ async def update_actividad_parcial(id: int, act_data: ActividadPartial, db: Asyn
         raise HTTPException(status_code=404, detail="Actividad no encontrada")
 
     return {"Mensaje": "Actividad actualizada con exito"}
+
+@router.post("/actividades/{id}/finalizar")
+async def finalizar_actividad(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    act = await finalizarAct(db, id)
+
+    if not act:
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+
+    return {"Mensaje": "Actividad finalizada con exito"}
