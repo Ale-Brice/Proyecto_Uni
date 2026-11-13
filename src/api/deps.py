@@ -36,12 +36,12 @@ async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, 
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
     # Extraemos el string del token del objeto credentials
     token = credentials.credentials
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         name = payload.get("sub")
+        permissions = payload.get("permissions", [])
         if name is None:
             raise credentials_exception
         token_data = TokenData(name=name)
@@ -52,6 +52,7 @@ async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, 
     if user is None:
         raise credentials_exception
 
+    user.permissions = permissions
     return user
 
 async def get_user(db: AsyncSession, name: str):

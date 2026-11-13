@@ -9,6 +9,7 @@ from src.api.deps import crear_token, verificar_token
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 from src.core.checker import PermissionChecker
+from src.api.deps import get_user_permissions
 
 require_create = PermissionChecker(["crear"])
 require_delete = PermissionChecker(["delete"])
@@ -24,7 +25,8 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: 
     if not user:
         raise HTTPException(status_code=400, detail="Usuario o Clave incorrectos")
 
-    token = crear_token({"sub": user.name})
+    user_permissions = await get_user_permissions(db, user.id)
+    token = crear_token({"sub": user.name, "permissions": user_permissions})
     return {"message": f"¡Bienvenido {user.name}!", "status": "success", "token": token}
 
 @router.post("/register")
