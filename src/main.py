@@ -15,6 +15,7 @@ from src.api.routes.pedido_router import router as pedido_router
 from src.api.routes.cost_adm_route import router as cost_adm_router
 from src.api.routes.pdf import router as pdf_router
 from src.api.routes.ventas_router import router as ventas_router
+from src.api.routes.pdf_auditoria import router as pdf_auditoria_router
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
 
@@ -31,4 +32,5 @@ app.include_router(prueba_seguridad_router, tags=["Prueba de Seguridad"])
 app.include_router(cost_op_router, tags=["Costos Operativos"])
 app.include_router(cost_adm_router, tags=["Costos Administrativos"])
 app.include_router(pdf_router, tags=["Reportes PDF"])
+app.include_router(pdf_auditoria_router, tags=["Auditoría PDF"])
 app.include_router(ventas_router, tags=["Ventas"])
