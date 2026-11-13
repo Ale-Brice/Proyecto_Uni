@@ -9,9 +9,6 @@ class PermissionChecker:
         self.required_permissions = required_permissions
 
     async def __call__(self, current_user = Depends(get_current_user)):
-        # Asumiendo que get_current_user ahora también devuelve los permisos del payload,
-        # o que modificas tu esquema de autenticación para leerlos de allí.
-        # current_user.permissions vendría de la decodificación del JWT
         for req_permission in self.required_permissions:
             if req_permission not in current_user.permissions:
                 raise HTTPException(

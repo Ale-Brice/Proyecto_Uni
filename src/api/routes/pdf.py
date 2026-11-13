@@ -25,13 +25,11 @@ async def generar_reporte_mensual(year: int, month: int, db: AsyncSession = Depe
     total_op = sum(c.gasto_operativo for c in oper_costs)
     total_ingresos = sum(v.precio_p * v.cantidad for v in ventas_mes)
 
-    # Para materia prima, el costo es precio * cantidad
     total_mat = sum((m.precio_mat * m.cantidad) for m in materias)
 
     gran_total = total_adm + total_op + total_mat
     ganancia_neta = total_ingresos - gran_total
 
-    # 3. Preparar la plantilla HTML (versión simplificada)
     html_template = """
     <!DOCTYPE html>
     <html>
@@ -119,7 +117,7 @@ async def generar_reporte_mensual(year: int, month: int, db: AsyncSession = Depe
     </html>
     """
 
-    # 4. Renderizar y convertir a PDF
+
     template = Template(html_template)
     html_content = template.render(
         mes=month, anio=year,
@@ -131,7 +129,7 @@ async def generar_reporte_mensual(year: int, month: int, db: AsyncSession = Depe
     pdf_bytes = HTML(string=html_content).write_pdf()
 
     return Response(
-        content=pdf_bytes, 
-        media_type="application/pdf", 
+        content=pdf_bytes,
+        media_type="application/pdf",
         headers={"Content-Disposition": f'inline; filename="reporte_costos_{year}_{month}.pdf"'}
     )

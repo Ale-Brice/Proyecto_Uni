@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 router = APIRouter()
 
-# Plantilla HTML optimizada para auditoría (Diseño Horizontal / Landscape)
+
 AUDIT_HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="es">
@@ -109,15 +109,10 @@ AUDIT_HTML_TEMPLATE = """
 @router.get("/reporte-auditoria/{year}/{month}", response_class=Response)
 async def generar_reporte_auditoria(year: int, month: int, db: AsyncSession = Depends(get_db)):
     audit_logs = await obt_audit_log_mes(db, year, month)
-    # Zona horaria local (UTC-4)
     tz_local = ZoneInfo("America/Caracas")
-    # Formatear cada registro antes de enviarlo a Jinja2
     logs_formateados = []
     for log in audit_logs:
-        # Convertir de UTC a hora local y quitar microsegundos
         fecha_local = log.created_at.astimezone(tz_local).strftime("%Y-%m-%d %H:%M:%S")
-        # Si prefieres formato día/mes/año con AM/PM, usa:
-        # fecha_local = log.created_at.astimezone(tz_local).strftime("%d/%m/%Y %I:%M:%S %p")
         logs_formateados.append({
             "id": log.id,
             "fecha_formateada": fecha_local,
@@ -130,7 +125,7 @@ async def generar_reporte_auditoria(year: int, month: int, db: AsyncSession = De
     html_rendered = template.render(
         year=year,
         month=month,
-        audit_logs=logs_formateados,  # Pasamos la lista ya formateada
+        audit_logs=logs_formateados,
         total_logs=len(logs_formateados)
     )
 

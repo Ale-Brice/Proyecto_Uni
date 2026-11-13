@@ -36,7 +36,7 @@ async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, 
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    # Extraemos el string del token del objeto credentials
+
     token = credentials.credentials
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -60,7 +60,6 @@ async def get_user(db: AsyncSession, name: str):
     return result.scalars().first()
 
 async def get_user_permissions(db: AsyncSession, user_id: int) -> list[str]:
-    # Hacemos múltiples JOINs para llegar desde el usuario hasta los nombres de los permisos
     stmt = (
         select(permiso.nombre_permiso)
         .join(permiso_rol, permiso.id_permiso == permiso_rol.fk_id_permiso)
