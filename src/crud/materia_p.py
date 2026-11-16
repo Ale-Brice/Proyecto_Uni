@@ -1,0 +1,59 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.exceptions import HTTPException
+from src.db.base import materia_p
+from sqlalchemy.future import select
+from datetime import date
+
+async def registrar_materia_p(db: AsyncSession, tipo_material: str, precio_mat: float, cantidad: int, fecha: date):
+    new_materia_p = materia_p(tipo_material=tipo_material, precio_mat=precio_mat, cantidad=cantidad, fecha=fecha)
+    db.add(new_materia_p)
+    await db.commit()
+    await db.refresh(new_materia_p)
+    return new_materia_p
+
+async def obt_materia_p(db: AsyncSession):
+    query = select(materia_p).where(materia_p.is_active == True)
+    result = await db.execute(query)
+    materiales = result.scalars().all()
+    return materiales
+
+async def del_materia_p(db: AsyncSession, id: int):
+    mat = await db.get(materia_p, id)
+
+    if not mat:
+        return mat
+
+    mat.is_active = False
+    await db.commit()
+    await db.refresh(mat)
+    return mat
+
+async def up_materia_p(db: AsyncSession, id: int, new_tipo_material: str, new_precio_mat: float, new_cantidad: int, new_fecha: date):
+    mat = await db.get(materia_p, id)
+
+    if not materia_p:
+        return None
+
+    mat.tipo_material = new_tipo_material
+    mat.precio_mat = new_precio_mat
+    mat.cantidad = new_cantidad
+    mat.fecha = new_fecha
+    await db.commit()
+    await db.refresh(mat)
+    return mat
+
+async def update_materia_pP(db: AsyncSession, id: int, tipo_material: str | None, precio_mat: float | None, cantidad: int | None, fecha: date | None):
+    mat = await db.get(materia_p, id)
+    if not mat:
+        return None
+    if tipo_material is not None:
+        mat.tipo_material = tipo_material
+    if precio_mat is not None:
+        mat.precio_mat = precio_mat
+    if cantidad is not None:
+        mat.cantidad = cantidad
+    if fecha is not None:
+        mat.fecha = fecha
+    await db.commit()
+    await db.refresh(mat)
+    return mat

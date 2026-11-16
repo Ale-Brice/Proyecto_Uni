@@ -1,0 +1,63 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.crud.detalles_pedido import *
+from src.core.audit import get_audited_db
+from src.core.checker import PermissionChecker
+from src.schemas.val_detalle_ped import *
+from sqlalchemy.future import select
+
+require_create = PermissionChecker(["crear"])
+require_delete = PermissionChecker(["delete"])
+require_view = PermissionChecker(["view"])
+require_update = PermissionChecker(["update"])
+
+router = APIRouter()
+
+@router.post("/detalle_pedido/register")
+async def register_detalle_pedido(data: detalles_pedido, db: AsyncSession = Depends(get_audited_db), user = Depends(require_create)):
+    register = await registrar_detalle_ped(db, fk_pedido=data.fk_pedido, pe_desc=data.pe_desc, tallas=data.tallas, cantidad=data.cantidad)
+
+    if not register:
+        raise HTTPException(status_code=400, detail="no ha ingresado el detalle de pedido")
+
+    return {"message": f"¡Detalle de pedido registrado con exito!", "status": "success"}
+
+@router.get("/detalle_pedido", response_model=list[detpedResponse])
+async def obtener_detalle_pedido(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    det_ped = await obt_detalle_ped(db)
+    return det_ped
+
+@router.delete("/detalle_pedido/{id}")
+async def delete_detalle_pedido(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    detalle_ped = await del_detalle_ped(db, id)
+
+    if not detalle_ped:
+        raise HTTPException(status_code=404, detail="Detalle de pedido no encontrado")
+
+    return {"Mensaje": "Detalle de pedido eliminado con exito"}
+
+@router.put("/detalle_pedido/{id}")
+async def update_detalle_pedido(id: int, new_pe_desc: str, new_tallas: int, new_cantidad: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    detalle_ped = await up_detalle_ped(db, id, new_pe_desc, new_tallas, new_cantidad)
+
+    if not detalle_ped:
+        raise HTTPException(status_code=404, detail="Detalle de pedido no encontrado")
+
+    return {"Mensaje": "Detalle de pedido actualizado con exito"}
+
+@router.patch("/detalle_pedido/{id}")
+async def update_detalle_pedido_parcial(id: int, det_data: detpedPartial, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    update_data = det_data.model_dump(exclude_unset=True)
+
+    detalle_ped = await update_detalle_pedP(
+        db=db,
+        id=id,
+        fk_pedido=update_data.get("fk_pedido"),
+        pe_desc=update_data.get("pe_desc"),
+        tallas=update_data.get("tallas"),
+        cantidad=update_data.get("cantidad")
+    )
+    if not detalle_ped:
+        raise HTTPException(status_code=404, detail="Detalle de pedido no encontrado")
+
+    return {"Mensaje": "Detalle de pedido actualizado con exito"}

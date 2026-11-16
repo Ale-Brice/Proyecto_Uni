@@ -1,0 +1,53 @@
+from fastapi import FastAPI, Depends, HTTPException
+from src.db.session import get_db
+from src.core.config import settings
+from src.api.routes.usuarios_router import router as usuarios_router
+from src.api.routes.prueba_seguridad import router as prueba_seguridad_router
+from src.api.routes.empleado_router import router as empleado_router
+from src.api.routes.cliente_route import router as cliente_router
+from src.api.routes.detalle_ped_router import router as detalle_ped_router
+from src.api.routes.materia_p_router import router as materia_p_router
+from src.api.routes.producto_router import router as producto_router
+from src.api.routes.actividades_router import router as actividades_router
+from src.api.routes.cost_op_route import router as cost_op_router
+from src.api.routes.detalle_pro_router import router as detalle_pro_router
+from src.api.routes.pedido_router import router as pedido_router
+from src.api.routes.cost_adm_route import router as cost_adm_router
+from src.api.routes.pdf import router as pdf_router
+from src.api.routes.ventas_router import router as ventas_router
+from src.api.routes.pdf_auditoria import router as pdf_auditoria_router
+from fastapi.middleware.cors import CORSMiddleware
+from typing import List
+
+origins = [
+    "http://localhost:5173"
+]
+
+app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(usuarios_router, tags=["Usuarios"])
+app.include_router(empleado_router, tags=["Empleados"])
+app.include_router(cliente_router, tags=["Clientes"])
+app.include_router(pedido_router, tags=["Pedidos"])
+app.include_router(detalle_ped_router, tags=["Detalles de Pedidos"])
+app.include_router(materia_p_router, tags=["Materias Primas"])
+app.include_router(producto_router, tags=["Productos"])
+app.include_router(detalle_pro_router, tags=["Detalles de Productos"])
+app.include_router(actividades_router, tags=["Actividades"])
+app.include_router(prueba_seguridad_router, tags=["Prueba de Seguridad"])
+app.include_router(cost_op_router, tags=["Costos Operativos"])
+app.include_router(cost_adm_router, tags=["Costos Administrativos"])
+app.include_router(pdf_router, tags=["Reportes PDF"])
+app.include_router(pdf_auditoria_router, tags=["Auditoría PDF"])
+app.include_router(ventas_router, tags=["Ventas"])
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,0 +1,28 @@
+from pydantic import BaseModel
+from datetime import datetime, date
+
+class actividad(BaseModel):
+    fk_empleado: int
+    fk_pedido: int
+    descripcion_tarea: str
+    fecha_inicio: date
+    fecha_final: date | None = None
+
+class actResponse(BaseModel):
+    id_actividad: int
+    fk_empleado: int
+    fk_pedido: int
+    descripcion_tarea: str
+    fecha_inicio: date
+    fecha_final : date | None = None
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+class ActividadPartial(BaseModel):
+    fk_empleado: int | None = None
+    fk_pedido: int | None = None
+    descripcion_tarea: str | None = None
+    fecha_inicio: date | None = None
+    fecha_final: date | None = None

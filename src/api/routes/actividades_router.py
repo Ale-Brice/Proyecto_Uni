@@ -1,0 +1,73 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.crud.actividades import *
+from src.core.audit import get_audited_db
+from src.core.checker import PermissionChecker
+from src.schemas.val_actividades import *
+from sqlalchemy.future import select
+
+require_create = PermissionChecker(["crear"])
+require_delete = PermissionChecker(["delete"])
+require_view = PermissionChecker(["view"])
+require_update = PermissionChecker(["update"])
+
+router = APIRouter()
+
+@router.post("/actividad/register")
+async def register_actividad(data: actividad, db: AsyncSession = Depends(get_audited_db), user = Depends(require_create)):
+    register = await registrar_actividad(db, data.fk_empleado, data.fk_pedido, data.descripcion_tarea, data.fecha_inicio)
+
+    if not register:
+        raise HTTPException(status_code=400, detail="no ha ingresado el empleado")
+
+    return {"message": f"¡Actividad registrada con exito!", "status": "success"}
+
+@router.get("/actividades", response_model=list[actResponse])
+async def obtener_actividad(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    act = await obt_actividad(db)
+    return act
+
+@router.delete("/actividades/{id}")
+async def delete_actividad(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    act = await delete_actividad(db, id)
+
+    if not act:
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+
+    return {"Mensaje": "Actividad eliminada con exito"}
+
+@router.put("/actividades/{id}")
+async def update_actividad(id: int, data: actividad, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    act = await up_actividad(db, id, data.fk_empleado, data.fk_pedido, data.descripcion_tarea, data.fecha_inicio, data.fecha_final)
+
+    if not act:
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+
+    return {"Mensaje": "Actividad actualizada con exito"}
+
+@router.patch("/actividades/{id}")
+async def update_actividad_parcial(id: int, act_data: ActividadPartial, db: AsyncSession = Depends(get_audited_db)):
+    update_data = act_data.model_dump(exclude_unset=True)
+
+    act = await update_actividadP(
+        db=db,
+        id=id,
+        fk_empleado=update_data.get("fk_empleado"),
+        fk_pedido=update_data.get("fk_pedido"),
+        descripcion_tarea=update_data.get("descripcion_tarea"),
+        fecha_inicio=update_data.get("fecha_inicio"),
+        fecha_final=update_data.get("fecha_final")
+    )
+    if not act:
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+
+    return {"Mensaje": "Actividad actualizada con exito"}
+
+@router.post("/actividades/{id}/finalizar")
+async def finalizar_actividad(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    act = await finalizarAct(db, id)
+
+    if not act:
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+
+    return {"Mensaje": "Actividad finalizada con exito"}

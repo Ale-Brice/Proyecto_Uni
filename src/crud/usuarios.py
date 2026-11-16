@@ -1,0 +1,80 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.exceptions import HTTPException
+from src.db.base import Usuario
+from sqlalchemy.future import select
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+async def obtener_usuario_por_nombre(db: AsyncSession, nombre: str, clave_proporcionada: str):
+    query = select(Usuario).where(Usuario.name == nombre)
+
+    result = await db.execute(query)
+
+    usuario = result.scalars().first()
+
+    if not usuario:
+        return None
+
+    is_valid = pwd_context.verify(clave_proporcionada, usuario.hashed_password)
+
+    if not is_valid:
+        return None
+    return usuario
+
+async def registrar_usuario(db: AsyncSession, nombre: str, clave_proporcionada: str):
+    if not nombre or not clave_proporcionada:
+        return None
+
+    hashed_password = pwd_context.hash(clave_proporcionada)
+    new_user = Usuario(name=nombre, hashed_password=hashed_password)
+    db.add(new_user)
+    await db.commit()
+    await db.refresh(new_user)
+    return new_user
+
+async def delete_user1(db: AsyncSession, id):
+    user = await db.get(Usuario, id)
+
+    if not user:
+        return user
+
+    user.is_active = False
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+async def up_user(db: AsyncSession, id: int, new_name: str, new_password: str, emp_fk: int):
+    user = await db.get(Usuario, id)
+
+    if not user:
+        return None
+
+    user.name = new_name
+    user.hashed_password = pwd_context.hash(new_password)
+    user.empleado_fk = emp_fk
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+async def update_user(db: AsyncSession, id: int, name: str, password: str, emp_fk: int):
+    user = await db.get(Usuario, id)
+    if not user:
+        return None
+    if name is not None:
+        user.name = name
+    if password is not None:
+        user.hashed_password = pwd_context.hash(password)
+    if emp_fk is not None:
+        user.empleado_fk = emp_fk
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+async def obt_ususarios(db: AsyncSession, ):
+    query = select(Usuario).where(Usuario.is_active == True)
+
+    result = await db.execute(query)
+
+    usuario = result.scalars().all()
+    return usuario
