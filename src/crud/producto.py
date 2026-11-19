@@ -16,6 +16,12 @@ async def obt_productos(db: AsyncSession):
     productos = result.scalars().all()
     return productos
 
+async def obt_productos_eliminados(db: AsyncSession):
+    query = select(producto).where(producto.is_active == False)
+    result = await db.execute(query)
+    productos = result.scalars().all()
+    return productos
+
 async def del_producto(db: AsyncSession, id: int):
     pro = await db.get(producto, id)
 
@@ -53,3 +59,14 @@ async def update_productoP(db: AsyncSession, id: int, nombre_p: str, tipo_p: str
     await db.commit()
     await db.refresh(prod)
     return prod
+
+async def rest_producto(db: AsyncSession, id: int):
+    pro = await db.get(producto, id)
+
+    if not pro:
+        return pro
+
+    pro.is_active = True
+    await db.commit()
+    await db.refresh(pro)
+    return pro

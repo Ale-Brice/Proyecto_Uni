@@ -20,9 +20,6 @@ async def obt_actividad(db: AsyncSession):
 async def delactividad(db: AsyncSession, id: int):
     act = await db.get(actividad, id)
 
-    if not act:
-        return act
-
     act.is_active = False
     await db.commit()
     await db.refresh(act)
@@ -68,6 +65,23 @@ async def update_actividadP(db: AsyncSession, id: int, fk_empleado: int | None =
         act.fecha_inicio = fecha_inicio
     if fecha_final is not None:
         act.fecha_final = fecha_final
+    await db.commit()
+    await db.refresh(act)
+    return act
+
+async def obt_actividad_eliminadas(db: AsyncSession):
+    query = select(actividad).where(actividad.is_active == False)
+    result = await db.execute(query)
+    actividades = result.scalars().all()
+    return actividades
+
+async def restaurar_act(db: AsyncSession, id: int):
+    act = await db.get(actividad, id)
+
+    if not act:
+        return act
+
+    act.is_active = True
     await db.commit()
     await db.refresh(act)
     return act

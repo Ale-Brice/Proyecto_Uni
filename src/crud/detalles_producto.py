@@ -11,7 +11,7 @@ async def registrar_detalle_pro(db: AsyncSession, tallas: str, cantidad: int, fk
     return new_detalle_pro
 
 async def obt_detalle_pro(db: AsyncSession):
-    query = select(detalle_pro)
+    query = select(detalle_pro).where(detalle_pro.is_active == True)
     result = await db.execute(query)
     detalles = result.scalars().all()
     return detalles
@@ -50,6 +50,23 @@ async def update_detalle_pro(db: AsyncSession, id: int, tallas: str, cantidad: i
         det.cantidad = cantidad
     if fk_producto is not None:
         det.fk_producto = fk_producto
+    await db.commit()
+    await db.refresh(det)
+    return det
+
+async def obt_detalle_pro_eliminados(db: AsyncSession):
+    query = select(detalle_pro).where(detalle_pro.is_active == False)
+    result = await db.execute(query)
+    detalles = result.scalars().all()
+    return detalles
+
+async def rest_detalle_pro(db: AsyncSession, id: int):
+    det = await db.get(detalle_pro, id)
+
+    if not det:
+        return det
+
+    det.is_active = True
     await db.commit()
     await db.refresh(det)
     return det

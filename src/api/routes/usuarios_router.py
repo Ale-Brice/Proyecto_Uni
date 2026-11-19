@@ -41,7 +41,8 @@ async def register(data: registrar, db: AsyncSession = Depends(get_db)):
 @router.get("/usuarios", response_model=list[UserResponse])
 async def obtener_usuarios(db: AsyncSession = Depends(get_db), user = Depends(require_view)):
     user = await obt_ususarios(db)
-
+    if not user:
+            raise HTTPException(status_code=400, detail="no se encontraron usuarios")
     return user
 
 @router.delete("/usuarios/{id}")
@@ -54,8 +55,8 @@ async def delete_user(id: int, db: AsyncSession = Depends(get_db), user = Depend
     return {"Mensaje": "Usuario eliminado con exito"}
 
 @router.put("/usuarios/{id}")
-async def update_user_complete(id: int, new_name: str, new_password: str, emp_fk: int, db: AsyncSession = Depends(get_db), user = Depends(require_update)):
-    user = await up_user(db, id, new_name, new_password, emp_fk)
+async def update_user_complete(id: int, data: registrar, db: AsyncSession = Depends(get_db), user = Depends(require_update)):
+    user = await up_user(db, id, data.name, data.contraseña, emp_fk=None)
 
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -63,7 +64,7 @@ async def update_user_complete(id: int, new_name: str, new_password: str, emp_fk
     return {"Mensaje": "Usuario actualizado con exito"}
 
 @router.patch("/usuarios/{id}")
-async def update_user_partial(id: int, user_data: UserPartial, db: AsyncSession = Depends(get_db)):
+async def update_user_partial(id: int, user_data: UserPartial, db: AsyncSession = Depends(get_db), user = Depends(require_update)):
     update_data = user_data.model_dump(exclude_unset=True)
 
     user = await update_user(
@@ -77,3 +78,21 @@ async def update_user_partial(id: int, user_data: UserPartial, db: AsyncSession 
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     return {"Mensaje": "Usuario actualizado con exito"}
+
+@router.get("/usuarios/eliminados")
+async def get_user_deleted(db: AsyncSession = Depends(get_db), user = Depends(require_view)):
+    user = await obt_usuarios_eliminados(db)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuarios eliminados no encontrados")
+
+    return user
+
+@router.post("/usuarios/{id}/restaurar")
+async def restaurar_usuario(id: int, db: AsyncSession = Depends(get_db), user = Depends(require_delete)):
+    user = await restaurar_user(db, id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    return {"Mensaje": "Usuario restaurado con exito"}

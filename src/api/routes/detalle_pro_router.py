@@ -25,6 +25,8 @@ async def register_detalle_producto(data: det_pro, db: AsyncSession = Depends(ge
 @router.get("/detalle_pro", response_model=list[detproResponse])
 async def obtener_detalle_producto(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     det_pro = await obt_detalle_pro(db)
+    if not det_pro:
+            raise HTTPException(status_code=400, detail="no se encontraron detalles de producto")
     return det_pro
 
 @router.delete("/detalle_pro/{id}")
@@ -37,8 +39,8 @@ async def delete_detalle_producto(id: int, db: AsyncSession = Depends(get_audite
     return {"Mensaje": "Detalle de producto eliminado con exito"}
 
 @router.put("/detalle_pro/{id}")
-async def update_detalle_producto(id: int, new_tallas: int, new_cantidad: int, new_fk_producto: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
-    detalle_pro = await up_detalle_pro(db, id, new_tallas, new_cantidad, new_fk_producto)
+async def update_detalle_producto(id: int, data: det_pro, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    detalle_pro = await up_detalle_pro(db, id, data.tallas, data.cantidad, data.fk_producto)
 
     if not detalle_pro:
         raise HTTPException(status_code=404, detail="Detalle de producto no encontrado")
@@ -60,3 +62,19 @@ async def update_detalle_producto_parcial(id: int, det_data: detproPartial, db: 
         raise HTTPException(status_code=404, detail="Detalle de producto no encontrado")
 
     return {"Mensaje": "Detalle de producto actualizado con exito"}
+
+@router.get("/detalle_pro/eliminados", response_model=list[detproResponse])
+async def obtener_detalle_producto_eliminados(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    det_pro = await obt_detalle_pro_eliminados(db)
+    if not det_pro:
+            raise HTTPException(status_code=400, detail="no se encontraron detalles de producto eliminados")
+    return det_pro
+
+@router.post("/detalle_pro/{id}/restaurar")
+async def restaurar_detalle_producto(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    detalle_ped = await rest_detalle_pro(db, id)
+
+    if not detalle_ped:
+        raise HTTPException(status_code=404, detail="Detalle de producto no encontrado")
+
+    return {"Mensaje": "Detalle de producto restaurado con exito"}

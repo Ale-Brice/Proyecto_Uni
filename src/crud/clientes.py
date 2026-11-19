@@ -56,3 +56,20 @@ async def update_clienteP(db: AsyncSession, id: int, nombre: str, apellido: str,
     await db.commit()
     await db.refresh(cli)
     return cli
+
+async def obt_clientes_eliminados(db: AsyncSession):
+    query = select(cliente).where(cliente.is_active == False)
+    result = await db.execute(query)
+    clientes = result.scalars().all()
+    return clientes
+
+async def rest_cliente(db: AsyncSession, id: int):
+    cli = await db.get(cliente, id)
+
+    if not cli:
+        return cli
+
+    cli.is_active = True
+    await db.commit()
+    await db.refresh(cli)
+    return cli

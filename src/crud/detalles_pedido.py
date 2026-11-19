@@ -16,6 +16,12 @@ async def obt_detalle_ped(db: AsyncSession):
     detalles = result.scalars().all()
     return detalles
 
+async def obt_detalle_ped_eliminados(db: AsyncSession):
+    query = select(detalles_pedido).where(detalles_pedido.is_active == False)
+    result = await db.execute(query)
+    detalles = result.scalars().all()
+    return detalles
+
 async def del_detalle_ped(db: AsyncSession, id: int):
     det = await db.get(detalles_pedido, id)
 
@@ -52,6 +58,17 @@ async def update_detalle_pedP(db: AsyncSession, id: int, fk_pedido: int | None, 
         det.tallas = tallas
     if cantidad is not None:
         det.cantidad = cantidad
+    await db.commit()
+    await db.refresh(det)
+    return det
+
+async def rest_detalle_ped(db: AsyncSession, id: int):
+    det = await db.get(detalles_pedido, id)
+
+    if not det:
+        return det
+
+    det.is_active = True
     await db.commit()
     await db.refresh(det)
     return det

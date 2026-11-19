@@ -6,6 +6,7 @@ class actividad(BaseModel):
     fk_pedido: int
     descripcion_tarea: str
     fecha_inicio: date
+    fecha_final: date | None = None
 
 class actResponse(BaseModel):
     id_actividad: int

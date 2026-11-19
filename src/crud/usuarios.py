@@ -78,3 +78,22 @@ async def obt_ususarios(db: AsyncSession, ):
 
     usuario = result.scalars().all()
     return usuario
+
+async def obt_usuarios_eliminados(db: AsyncSession, ):
+    query = select(Usuario).where(Usuario.is_active == False)
+
+    result = await db.execute(query)
+
+    usuario = result.scalars().all()
+    return usuario
+
+async def restaurar_user(db: AsyncSession, id):
+    user = await db.get(Usuario, id)
+
+    if not user:
+        return user
+
+    user.is_active = True
+    await db.commit()
+    await db.refresh(user)
+    return user

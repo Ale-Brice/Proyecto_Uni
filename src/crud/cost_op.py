@@ -12,7 +12,13 @@ async def registrar_cost_op(db: AsyncSession, tipo_gasto_operativo: str, gasto_o
     return new_cost_op
 
 async def obt_cost_op(db: AsyncSession):
-    query = select(cost_op)
+    query = select(cost_op).where(cost_op.is_active == True)
+    result = await db.execute(query)
+    costop = result.scalars().all()
+    return costop
+
+async def obt_cost_op_eliminados(db: AsyncSession):
+    query = select(cost_op).where(cost_op.is_active == False)
     result = await db.execute(query)
     costop = result.scalars().all()
     return costop
@@ -51,6 +57,17 @@ async def update_cost_opP(db: AsyncSession, id: int, tipo_gasto_operativo: str |
         cost.gasto_operativo = gasto_operativo
     if fecha is not None:
         cost.fecha = fecha
+    await db.commit()
+    await db.refresh(cost)
+    return cost
+
+async def rest_cost_op(db: AsyncSession, id: int):
+    cost = await db.get(cost_op, id)
+
+    if not cost:
+        return cost
+
+    cost.is_active = True
     await db.commit()
     await db.refresh(cost)
     return cost

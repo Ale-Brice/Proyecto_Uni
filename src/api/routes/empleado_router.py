@@ -25,6 +25,8 @@ async def register_empleado(data: empleado, db: AsyncSession = Depends(get_audit
 @router.get("/empleados", response_model=list[EmpResponse])
 async def obtener_empleados(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     emp = await obt_empleados(db)
+    if not emp:
+            raise HTTPException(status_code=400, detail="no se encontraron empleados")
     return emp
 
 @router.delete("/empleados/{id}")
@@ -37,8 +39,8 @@ async def delete_empleado(id: int, db: AsyncSession = Depends(get_audited_db), u
     return {"Mensaje": "Empleado eliminado con exito"}
 
 @router.put("/empleados/{id}")
-async def update_empleado_complete(id: int, new_name: str, apellido: str, numero: str, email: str, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
-    emp = await up_empleado(db, id, new_name, apellido, numero, email)
+async def update_empleado_complete(id: int, data: empleado, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    emp = await up_empleado(db, id, data.nombre, data.apellido, data.numero, data.email)
 
     if not emp:
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
@@ -61,3 +63,19 @@ async def update_empleado_parcial(id: int, emp_data: EmpPartial, db: AsyncSessio
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
 
     return {"Mensaje": "Empleado actualizado con exito"}
+
+@router.get("/empleados/eliminados", response_model=list[EmpResponse])
+async def obtener_empleados_eliminados(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    emp = await obt_empleados_eliminados(db)
+    if not emp:
+            raise HTTPException(status_code=400, detail="no se encontraron empleados eliminados")
+    return emp
+
+@router.post("/empleados/{id}/restaurar")
+async def restaurar_empleado(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    emp = await rest_empleado(db, id)
+
+    if not emp:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+
+    return {"Mensaje": "Empleado restaurado con exito"}

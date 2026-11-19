@@ -21,9 +21,9 @@ passlib==1.7.4
 pillow==12.3.0
 psycopg2-binary==2.9.11
 pycparser==3.0
-pydantic==2.12.5
-pydantic-settings==2.13.1
-pydantic_core==2.41.5
+pydantic==2.13.5
+pydantic-settings==2.16.3
+pydantic_core==2.46.5
 pydyf==0.12.1
 PyJWT==2.13.0
 pyphen==0.18.1
@@ -35,6 +35,7 @@ tinycss2==1.5.1
 tinyhtml5==2.1.0
 typing-inspection==0.4.2
 typing_extensions==4.15.0
+tzdata==2026.6
 uvicorn==0.41.0
 weasyprint==69.0
 webencodings==0.6.1
