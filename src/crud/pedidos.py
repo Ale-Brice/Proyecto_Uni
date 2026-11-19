@@ -18,27 +18,44 @@ async def obt_pedido(db: AsyncSession):
     return detalles
 
 async def del_pedido(db: AsyncSession, id: int):
-    pedido = await db.get(pedido, id)
+    ped = await db.get(pedido, id)
 
-    if not pedido:
-        return pedido
+    if not ped:
+        return ped
 
-    pedido.is_active = False
+    ped.is_active = False
     await db.commit()
-    await db.refresh(pedido)
-    return pedido
+    await db.refresh(ped)
+    return ped
+
+async def rest_pedido(db: AsyncSession, id: int):
+    ped = await db.get(pedido, id)
+
+    if not ped:
+        return ped
+
+    ped.is_active = True
+    await db.commit()
+    await db.refresh(ped)
+    return ped
+
+async def obt_pedido_eliminados(db: AsyncSession):
+    query = select(pedido).where(pedido.is_active == False)
+    result = await db.execute(query)
+    detalles = result.scalars().all()
+    return detalles
 
 async def up_pedido(db: AsyncSession, id: int, new_fk_cliente: int, new_fk_producto: int):
-    pedido = await db.get(pedido, id)
+    ped = await db.get(pedido, id)
 
-    if not pedido:
+    if not ped:
         return None
 
-    pedido.fk_cliente = new_fk_cliente
-    pedido.fk_producto = new_fk_producto
+    ped.fk_cliente = new_fk_cliente
+    ped.fk_producto = new_fk_producto
     await db.commit()
-    await db.refresh(pedido)
-    return pedido
+    await db.refresh(ped)
+    return ped
 
 async def update_pedidoP(db: AsyncSession, id: int, fk_cliente: int | None, fk_producto: int | None):
     ped = await db.get(pedido, id)

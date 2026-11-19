@@ -26,6 +26,8 @@ async def register_cost_adm(data: cost_adm, db: AsyncSession = Depends(get_audit
 @router.get("/cost_adm", response_model=list[costadmResponse])
 async def obtener_cost_adm(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     cost_adm = await obt_cost_adm(db)
+    if not cost_adm:
+            raise HTTPException(status_code=400, detail="no se encontraron costos administrativos")
     return cost_adm
 
 @router.delete("/cost_adm/{id}")
@@ -38,8 +40,8 @@ async def delete_cost_adm(id: int, db: AsyncSession = Depends(get_audited_db), u
     return {"Mensaje": "Costo administrativo eliminado con exito"}
 
 @router.put("/cost_adm/{id}")
-async def update_cost_adm(id: int, new_tipo_costo : str, new_gasto_administrativo : int , new_fecha : date, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
-    cost_adm = await up_cost_adm(db, id, new_tipo_costo, new_gasto_administrativo, new_fecha)
+async def update_cost_adm(id: int, data: cost_adm, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    cost_adm = await up_cost_adm(db, id, data.tipo_costo, data.gasto_administrativo, data.fecha)
 
     if not cost_adm:
         raise HTTPException(status_code=404, detail="Costo administrativo no encontrado")
@@ -61,3 +63,19 @@ async def update_cost_adm_parcial(id: int, cost_data: costadmPartial, db: AsyncS
         raise HTTPException(status_code=404, detail="Costo administrativo no encontrado")
 
     return {"Mensaje": "Costo administrativo actualizado con exito"}
+
+@router.get("/cost_adm/eliminadas", response_model=list[costadmResponse])
+async def obtener_cost_adm_eliminadas(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    cost_adm = await obt_cost_adm_eliminadas(db)
+    if not cost_adm:
+            raise HTTPException(status_code=400, detail="no se encontraron costos administrativos eliminados")
+    return cost_adm
+
+@router.post("/cost_adm/{id}/restaurar")
+async def restaurar_cost_adm(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    cost_adm = await rest_cost_adm(db, id)
+
+    if not cost_adm:
+        raise HTTPException(status_code=404, detail="Costo administrativo no encontrado")
+
+    return {"Mensaje": "Costo administrativo restaurado con exito"}

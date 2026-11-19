@@ -25,6 +25,8 @@ async def register_cost_op(data: cost_op, db: AsyncSession = Depends(get_audited
 @router.get("/cost_op", response_model=list[costopResponse])
 async def obtener_cost_op(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     cost_op = await obt_cost_op(db)
+    if not cost_op:
+        raise HTTPException(status_code=400, detail="no se encontraron costos operativos")
     return cost_op
 
 @router.delete("/cost_op/{id}")
@@ -37,8 +39,8 @@ async def delete_cost_op(id: int, db: AsyncSession = Depends(get_audited_db), us
     return {"Mensaje": "Costo operativo eliminado con exito"}
 
 @router.put("/cost_op/{id}")
-async def update_cost_op(id: int, new_tipo_gasto_operativo : str, new_gasto_operativo : int , new_fecha : date, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
-    cost_op = await up_cost_op(db, id, new_tipo_gasto_operativo, new_gasto_operativo, new_fecha)
+async def update_cost_op(id: int, data: cost_op, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    cost_op = await up_cost_op(db, id, data.tipo_gasto_operativo, data.gasto_operativo, data.fecha)
 
     if not cost_op:
         raise HTTPException(status_code=404, detail="Costo operativo no encontrado")
@@ -60,3 +62,19 @@ async def update_cost_op_parcial(id: int, cost_op_data: costopPartial, db: Async
         raise HTTPException(status_code=404, detail="Costo operativo no encontrado")
 
     return {"Mensaje": "Costo operativo actualizado con exito"}
+
+@router.get("/cost_op/eliminados", response_model=list[costopResponse])
+async def obtener_cost_op_eliminados(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    cost_op = await obt_cost_op_eliminados(db)
+    if not cost_op:
+        raise HTTPException(status_code=400, detail="no se encontraron costos operativos eliminados")
+    return cost_op
+
+@router.post("/cost_op/{id}/restaurar")
+async def restaurar_cost_op(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    cost_op = await rest_cost_op(db, id)
+
+    if not cost_op:
+        raise HTTPException(status_code=404, detail="Costo operativo no encontrado")
+
+    return {"Mensaje": "Costo operativo restaurado con exito"}

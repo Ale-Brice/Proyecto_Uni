@@ -26,6 +26,12 @@ async def obt_ventas(db: AsyncSession):
     ven = result.scalars().all()
     return ven
 
+async def obt_ventas_eliminadas(db: AsyncSession):
+    query = select(ventas).where(ventas.is_active == False)
+    result = await db.execute(query)
+    ven = result.scalars().all()
+    return ven
+
 async def delventa(db: AsyncSession, id: int):
     act = await db.get(ventas, id)
 
@@ -66,3 +72,14 @@ async def update_ventaP(db: AsyncSession, id: int, fk_producto: int | None = Non
     await db.commit()
     await db.refresh(ven)
     return ven
+
+async def rest_venta(db: AsyncSession, id: int):
+    act = await db.get(ventas, id)
+
+    if not act:
+        return act
+
+    act.is_active = True
+    await db.commit()
+    await db.refresh(act)
+    return act

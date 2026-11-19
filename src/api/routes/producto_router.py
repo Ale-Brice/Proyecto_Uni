@@ -26,6 +26,8 @@ async def register_producto(data: producto, db: AsyncSession = Depends(get_audit
 @router.get("/producto", response_model=list[proResponse])
 async def obtener_producto(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     pro = await obt_productos(db)
+    if not pro:
+            raise HTTPException(status_code=400, detail="no se ha encontrado el producto")
     return pro
 
 @router.delete("/producto/{id}")
@@ -61,3 +63,19 @@ async def update_producto_parcial(id: int, prod_data: proPartial, db: AsyncSessi
         raise HTTPException(status_code=404, detail="Producto no encontrado")
 
     return {"Mensaje": "Producto actualizado con exito"}
+
+@router.get("/producto/eliminados", response_model=list[proResponse])
+async def obtener_producto_eliminados(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    pro = await obt_productos_eliminados(db)
+    if not pro:
+            raise HTTPException(status_code=400, detail="no se ha encontrado el producto")
+    return pro
+
+@router.post("/producto/{id}/restaurar")
+async def restaurar_producto(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    producto = await rest_producto(db, id)
+
+    if not producto:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+    return {"Mensaje": "Producto restaurado con exito"}

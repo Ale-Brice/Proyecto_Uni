@@ -25,6 +25,8 @@ async def register_venta(data: venta, db: AsyncSession = Depends(get_audited_db)
 @router.get("/ventas", response_model=list[ventaResponse])
 async def obtener_ventas(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     ventas = await obt_ventas(db)
+    if not ventas:
+            raise HTTPException(status_code=400, detail="no se ha encontrado el producto")
     return ventas
 
 @router.delete("/ventas/{id}")
@@ -37,8 +39,8 @@ async def delete_venta(id: int, db: AsyncSession = Depends(get_audited_db), user
     return {"Mensaje": "Venta eliminada con exito"}
 
 @router.put("/ventas/{id}")
-async def update_venta(id: int, fk_producto: int, precio_p: float, cantidad: int, fecha: date, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
-    act = await up_venta(db, id, fk_producto, precio_p, cantidad, fecha)
+async def update_venta(id: int, data: venta, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    act = await up_venta(db, id, data.fk_producto, data.precio_p, data.cantidad, data.fecha)
 
     if not act:
         raise HTTPException(status_code=404, detail="Venta no encontrada")
@@ -61,3 +63,19 @@ async def update_venta_parcial(id: int, venta_data: ventaPartial, db: AsyncSessi
         raise HTTPException(status_code=404, detail="Venta no encontrada")
 
     return {"Mensaje": "Venta actualizada con exito"}
+
+@router.get("/ventas/eliminadas", response_model=list[ventaResponse])
+async def obtener_ventas_eliminadas(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    ventas = await obt_ventas_eliminadas(db)
+    if not ventas:
+            raise HTTPException(status_code=400, detail="no se ha encontrado el producto")
+    return ventas
+
+@router.post("/ventas/{id}/restaurar")
+async def restaurar_venta(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    act = await rest_venta(db, id)
+
+    if not act:
+        raise HTTPException(status_code=404, detail="Venta no encontrada")
+
+    return {"Mensaje": "Venta restaurada con exito"}

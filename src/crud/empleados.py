@@ -16,6 +16,12 @@ async def obt_empleados(db: AsyncSession):
     empleados = result.scalars().all()
     return empleados
 
+async def obt_empleados_eliminados(db: AsyncSession):
+    query = select(empleado).where(empleado.is_active == False)
+    result = await db.execute(query)
+    empleados = result.scalars().all()
+    return empleados
+
 async def del_empleado(db: AsyncSession, id: int):
     emp = await db.get(empleado, id)
 
@@ -53,6 +59,17 @@ async def update_empleado(db: AsyncSession, id: int, nombre: str, apellido: str,
         emp.numero = numero
     if email is not None:
         emp.email = email
+    await db.commit()
+    await db.refresh(emp)
+    return emp
+
+async def rest_empleado(db: AsyncSession, id: int):
+    emp = await db.get(empleado, id)
+
+    if not emp:
+        return emp
+
+    emp.is_active = True
     await db.commit()
     await db.refresh(emp)
     return emp

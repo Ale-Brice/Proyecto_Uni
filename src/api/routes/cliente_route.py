@@ -25,6 +25,8 @@ async def register_cliente(data: cliente, db: AsyncSession = Depends(get_audited
 @router.get("/clientes", response_model=list[cliResponse])
 async def obtener_clientes(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     clientes = await obt_clientes(db)
+    if not clientes:
+            raise HTTPException(status_code=400, detail="no se encontraron clientes")
     return clientes
 
 @router.delete("/clientes/{id}")
@@ -37,8 +39,8 @@ async def delete_cliente(id: int, db: AsyncSession = Depends(get_audited_db), us
     return {"Mensaje": "Cliente eliminado con exito"}
 
 @router.put("/clientes/{id}")
-async def update_cliente(id: int, new_name: str, apellido: str, numero: str, email: str, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
-    cliente = await up_cliente(db, id, new_name, apellido, numero, email)
+async def update_cliente(id: int, data: cliente, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    cliente = await up_cliente(db, id, data.nombre, data.apellido, data.numero, data.email)
 
     if not cliente:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
@@ -61,3 +63,19 @@ async def update_cliente_parcial(id: int, cli_data: cliPartial, db: AsyncSession
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
 
     return {"Mensaje": "Cliente actualizado con exito"}
+
+@router.get("/clientes/eliminados", response_model=list[cliResponse])
+async def obtener_clientes_eliminados(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    clientes = await obt_clientes_eliminados(db)
+    if not clientes:
+        raise HTTPException(status_code=404, detail="No se encontraron clientes eliminados")
+    return clientes
+
+@router.post("/clientes/{id}/eliminados")
+async def restaurar_cliente(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    cliente = await rest_cliente(db, id)
+
+    if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+
+    return {"Mensaje": "Cliente restaurado con exito"}

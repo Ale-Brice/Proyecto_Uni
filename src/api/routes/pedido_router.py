@@ -25,6 +25,8 @@ async def register_pedido(data: pedido, db: AsyncSession = Depends(get_audited_d
 @router.get("/pedido", response_model=list[pedResponse])
 async def obtener_pedido(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     ped = await obt_pedido(db)
+    if not ped:
+            raise HTTPException(status_code=400, detail="no se ha encontrado el detalle de pedido")
     return ped
 
 @router.delete("/pedido/{id}")
@@ -59,3 +61,19 @@ async def update_pedido_parcial(id: int, ped_data: pedPartial, db: AsyncSession 
         raise HTTPException(status_code=404, detail="Pedido no encontrado")
 
     return {"Mensaje": "Pedido actualizado con exito"}
+
+@router.get("/pedido/eliminados", response_model=list[pedResponse])
+async def obtener_pedido_eliminados(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    ped = await obt_pedido_eliminados(db)
+    if not ped:
+            raise HTTPException(status_code=400, detail="no se ha encontrado el detalle de pedido")
+    return ped
+
+@router.post("/pedido/{id}/restaurar")
+async def restaurar_pedido(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    ped = await rest_pedido(db, id)
+
+    if not ped:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+
+    return {"Mensaje": "Pedido restaurado con exito"}

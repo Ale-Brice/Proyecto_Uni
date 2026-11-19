@@ -17,6 +17,12 @@ async def obt_materia_p(db: AsyncSession):
     materiales = result.scalars().all()
     return materiales
 
+async def obt_materia_p_eliminadas(db: AsyncSession):
+    query = select(materia_p).where(materia_p.is_active == False)
+    result = await db.execute(query)
+    materiales = result.scalars().all()
+    return materiales
+
 async def del_materia_p(db: AsyncSession, id: int):
     mat = await db.get(materia_p, id)
 
@@ -31,7 +37,7 @@ async def del_materia_p(db: AsyncSession, id: int):
 async def up_materia_p(db: AsyncSession, id: int, new_tipo_material: str, new_precio_mat: float, new_cantidad: int, new_fecha: date):
     mat = await db.get(materia_p, id)
 
-    if not materia_p:
+    if not mat:
         return None
 
     mat.tipo_material = new_tipo_material
@@ -54,6 +60,17 @@ async def update_materia_pP(db: AsyncSession, id: int, tipo_material: str | None
         mat.cantidad = cantidad
     if fecha is not None:
         mat.fecha = fecha
+    await db.commit()
+    await db.refresh(mat)
+    return mat
+
+async def rest_materia_p(db: AsyncSession, id: int):
+    mat = await db.get(materia_p, id)
+
+    if not mat:
+        return mat
+
+    mat.is_active = True
     await db.commit()
     await db.refresh(mat)
     return mat

@@ -26,6 +26,8 @@ async def register_materia_p(data: materia_p, db: AsyncSession = Depends(get_aud
 @router.get("/materia_prima", response_model=list[matResponse])
 async def obtener_materia_p(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     mat = await obt_materia_p(db)
+    if not mat:
+            raise HTTPException(status_code=400, detail="no se encontraron materias primas")
     return mat
 
 @router.delete("/materia_prima/{id}")
@@ -38,8 +40,8 @@ async def delete_materia_p(id: int, db: AsyncSession = Depends(get_audited_db), 
     return {"Mensaje": "Materia prima eliminada con exito"}
 
 @router.put("/materia_prima/{id}")
-async def update_materia_p(id: int, new_tipo_material: str, new_precio_mat: float, new_cantidad: int, new_fecha: date, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
-    materia_p = await up_materia_p(db, id, new_tipo_material, new_precio_mat, new_cantidad, new_fecha)
+async def update_materia_p(id: int, data: materia_p, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    materia_p = await up_materia_p(db, id, data.tipo_material, data.precio_mat, data.cantidad, data.fecha)
 
     if not materia_p:
         raise HTTPException(status_code=404, detail="Materia prima no encontrada")
@@ -62,3 +64,19 @@ async def update_materia_p_parcial(id: int, mat_data: matPartial, db: AsyncSessi
         raise HTTPException(status_code=404, detail="Materia prima no encontrada")
 
     return {"Mensaje": "Materia prima actualizada con exito"}
+
+@router.get("/materia_prima/eliminadas", response_model=list[matResponse])
+async def obtener_materia_p_eliminadas(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    mat = await obt_materia_p_eliminadas(db)
+    if not mat:
+            raise HTTPException(status_code=400, detail="no se encontraron materias primas eliminadas")
+    return mat
+
+@router.post("/materia_prima/{id}/restaurar")
+async def restaurar_materia_p(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    materia_p = await rest_materia_p(db, id)
+
+    if not materia_p:
+        raise HTTPException(status_code=404, detail="Materia prima no encontrada")
+
+    return {"Mensaje": "Materia prima restaurada con exito"}

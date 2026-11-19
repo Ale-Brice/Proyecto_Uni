@@ -18,18 +18,20 @@ async def register_actividad(data: actividad, db: AsyncSession = Depends(get_aud
     register = await registrar_actividad(db, data.fk_empleado, data.fk_pedido, data.descripcion_tarea, data.fecha_inicio)
 
     if not register:
-        raise HTTPException(status_code=400, detail="no ha ingresado el empleado")
+        raise HTTPException(status_code=400, detail="no ha ingresado la actividad")
 
     return {"message": f"¡Actividad registrada con exito!", "status": "success"}
 
 @router.get("/actividades", response_model=list[actResponse])
 async def obtener_actividad(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     act = await obt_actividad(db)
+    if not act:
+            raise HTTPException(status_code=400, detail="no se encontraron actividades")
     return act
 
 @router.delete("/actividades/{id}")
 async def delete_actividad(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
-    act = await delete_actividad(db, id)
+    act = await delactividad(db, id)
 
     if not act:
         raise HTTPException(status_code=404, detail="Actividad no encontrada")
@@ -71,3 +73,19 @@ async def finalizar_actividad(id: int, db: AsyncSession = Depends(get_audited_db
         raise HTTPException(status_code=404, detail="Actividad no encontrada")
 
     return {"Mensaje": "Actividad finalizada con exito"}
+
+@router.get("/actividades/eliminadas", response_model=list[actResponse])
+async def obtener_actividad_eliminadas(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    act = await obt_actividad_eliminadas(db)
+    if not act:
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+    return act
+
+@router.post("/actividades/{id}/eliminadas")
+async def restaurar_actividad(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    act = await restaurar_act(db, id)
+
+    if not act:
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+
+    return {"Mensaje": "Actividad restaurada con exito"}

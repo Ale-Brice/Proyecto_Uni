@@ -12,7 +12,7 @@ async def registrar_cost_adm(db: AsyncSession, tipo_costo: str, gasto_administra
     return new_cost_adm
 
 async def obt_cost_adm(db: AsyncSession):
-    query = select(cost_adm)
+    query = select(cost_adm).where(cost_adm.is_active == True)
     result = await db.execute(query)
     costadms = result.scalars().all()
     return costadms
@@ -51,6 +51,23 @@ async def update_cost_admP(db: AsyncSession, id: int, tipo_costo: str, gasto_adm
         cost.gasto_administrativo = gasto_administrativo
     if fecha is not None:
         cost.fecha = fecha
+    await db.commit()
+    await db.refresh(cost)
+    return cost
+
+async def obt_cost_adm_eliminadas(db: AsyncSession):
+    query = select(cost_adm).where(cost_adm.is_active == False)
+    result = await db.execute(query)
+    costadms = result.scalars().all()
+    return costadms
+
+async def rest_cost_adm(db: AsyncSession, id: int):
+    cost = await db.get(cost_adm, id)
+
+    if not cost:
+        return cost
+
+    cost.is_active = True
     await db.commit()
     await db.refresh(cost)
     return cost

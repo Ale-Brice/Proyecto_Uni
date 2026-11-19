@@ -25,6 +25,8 @@ async def register_detalle_pedido(data: detalles_pedido, db: AsyncSession = Depe
 @router.get("/detalle_pedido", response_model=list[detpedResponse])
 async def obtener_detalle_pedido(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     det_ped = await obt_detalle_ped(db)
+    if not det_ped:
+            raise HTTPException(status_code=400, detail="no se encontraron detalles de pedido")
     return det_ped
 
 @router.delete("/detalle_pedido/{id}")
@@ -37,8 +39,8 @@ async def delete_detalle_pedido(id: int, db: AsyncSession = Depends(get_audited_
     return {"Mensaje": "Detalle de pedido eliminado con exito"}
 
 @router.put("/detalle_pedido/{id}")
-async def update_detalle_pedido(id: int, new_pe_desc: str, new_tallas: int, new_cantidad: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
-    detalle_ped = await up_detalle_ped(db, id, new_pe_desc, new_tallas, new_cantidad)
+async def update_detalle_pedido(id: int, data: detalles_pedido, db: AsyncSession = Depends(get_audited_db), user = Depends(require_update)):
+    detalle_ped = await up_detalle_ped(db, id, data.pe_desc, data.tallas, data.cantidad)
 
     if not detalle_ped:
         raise HTTPException(status_code=404, detail="Detalle de pedido no encontrado")
@@ -61,3 +63,19 @@ async def update_detalle_pedido_parcial(id: int, det_data: detpedPartial, db: As
         raise HTTPException(status_code=404, detail="Detalle de pedido no encontrado")
 
     return {"Mensaje": "Detalle de pedido actualizado con exito"}
+
+@router.get("/detalle_pedido/eliminados", response_model=list[detpedResponse])
+async def obtener_detalle_pedido_eliminados(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+    det_ped = await obt_detalle_ped_eliminados(db)
+    if not det_ped:
+            raise HTTPException(status_code=400, detail="no se encontraron detalles de pedido eliminados")
+    return det_ped
+
+@router.post("/detalle_pedido/{id}/restaurar")
+async def restaurar_detalle_pedido(id: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_delete)):
+    detalle_ped = await rest_detalle_ped(db, id)
+
+    if not detalle_ped:
+        raise HTTPException(status_code=404, detail="Detalle de pedido no encontrado")
+
+    return {"Mensaje": "Detalle de pedido restaurado con exito"}
