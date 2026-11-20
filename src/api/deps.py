@@ -65,7 +65,11 @@ async def get_user_permissions(db: AsyncSession, user_id: int) -> list[str]:
         .join(permiso_rol, permiso.id_permiso == permiso_rol.fk_id_permiso)
         .join(rol, permiso_rol.fk_id_rol == rol.id_rol)
         .join(rol_usuario, rol.id_rol == rol_usuario.fk_id_rol)
-        .where(rol_usuario.fk_id_usuario == user_id)
+        .where(rol_usuario.fk_id_usuario == user_id,
+            rol.is_active != False,
+            rol_usuario.is_active != False,
+            permiso.is_active != False,
+            permiso_rol.is_active != False,)
     )
     result = await db.execute(stmt)
     return result.scalars().all()

@@ -16,6 +16,7 @@ from src.api.routes.cost_adm_route import router as cost_adm_router
 from src.api.routes.pdf import router as pdf_router
 from src.api.routes.ventas_router import router as ventas_router
 from src.api.routes.pdf_auditoria import router as pdf_auditoria_router
+from src.api.routes.roles_router import router as roles_router
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 
@@ -33,6 +34,7 @@ app.add_middleware(
 )
 
 app.include_router(usuarios_router, tags=["Usuarios"])
+app.include_router(roles_router, tags=["Roles"])
 app.include_router(empleado_router, tags=["Empleados"])
 app.include_router(cliente_router, tags=["Clientes"])
 app.include_router(pedido_router, tags=["Pedidos"])

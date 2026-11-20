@@ -13,6 +13,7 @@ class detproResponse(BaseModel):
     tallas: str
     cantidad: int
     fk_producto: int
+    is_active: bool
 
     class Config:
         from_attributes = True
