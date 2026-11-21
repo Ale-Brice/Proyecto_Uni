@@ -10,3 +10,8 @@ async def obt_audit_log_mes(db: AsyncSession, year: int, month: int):
 
     result = await db.execute(query)
     return result.scalars().all()
+
+async def obt_audit_log(db: AsyncSession):
+    query = select(AuditLog).order_by(AuditLog.created_at.asc())
+    result = await db.execute(query)
+    return result.scalars().all()

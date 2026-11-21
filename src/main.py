@@ -17,6 +17,8 @@ from src.api.routes.pdf import router as pdf_router
 from src.api.routes.ventas_router import router as ventas_router
 from src.api.routes.pdf_auditoria import router as pdf_auditoria_router
 from src.api.routes.roles_router import router as roles_router
+from src.api.routes.excel_gast import router as excel_gast_router
+from src.api.routes.auditoria import router as auditoria_router
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 
@@ -48,7 +50,9 @@ app.include_router(cost_op_router, tags=["Costos Operativos"])
 app.include_router(cost_adm_router, tags=["Costos Administrativos"])
 app.include_router(pdf_router, tags=["Reportes PDF"])
 app.include_router(pdf_auditoria_router, tags=["Auditoría PDF"])
+app.include_router(excel_gast_router, tags=["Reporte Excel"])
 app.include_router(ventas_router, tags=["Ventas"])
+app.include_router(auditoria_router, tags=["Auditoría"])
 
 if __name__ == "__main__":
     import uvicorn
