@@ -2,7 +2,6 @@ from fastapi import FastAPI, Depends, HTTPException
 from src.db.session import get_db
 from src.core.config import settings
 from src.api.routes.usuarios_router import router as usuarios_router
-from src.api.routes.prueba_seguridad import router as prueba_seguridad_router
 from src.api.routes.empleado_router import router as empleado_router
 from src.api.routes.cliente_route import router as cliente_router
 from src.api.routes.detalle_ped_router import router as detalle_ped_router
@@ -45,7 +44,6 @@ app.include_router(materia_p_router, tags=["Materias Primas"])
 app.include_router(producto_router, tags=["Productos"])
 app.include_router(detalle_pro_router, tags=["Detalles de Productos"])
 app.include_router(actividades_router, tags=["Actividades"])
-app.include_router(prueba_seguridad_router, tags=["Prueba de Seguridad"])
 app.include_router(cost_op_router, tags=["Costos Operativos"])
 app.include_router(cost_adm_router, tags=["Costos Administrativos"])
 app.include_router(pdf_router, tags=["Reportes PDF"])
