@@ -9,7 +9,10 @@ from sqlalchemy.future import select
 require_create = PermissionChecker(["crear"])
 require_delete = PermissionChecker(["delete"])
 require_view = PermissionChecker(["view"])
+require_view_actividades = PermissionChecker(["view_actividades"])
 require_update = PermissionChecker(["update"])
+
+require_view_act = PermissionChecker(["view", "view_actividades"])
 
 router = APIRouter()
 
@@ -23,7 +26,7 @@ async def register_actividad(data: actividad, db: AsyncSession = Depends(get_aud
     return {"message": f"¡Actividad registrada con exito!", "status": "success"}
 
 @router.get("/actividades", response_model=list[actResponse])
-async def obtener_actividad(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+async def obtener_actividad(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view_act)):
     act = await obt_actividad(db)
     if not act:
             raise HTTPException(status_code=400, detail="no se encontraron actividades")

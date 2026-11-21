@@ -10,7 +10,10 @@ from datetime import date
 require_create = PermissionChecker(["crear"])
 require_delete = PermissionChecker(["delete"])
 require_view = PermissionChecker(["view"])
+require_view_materia_prima = PermissionChecker(["view_materia_prima"])
 require_update = PermissionChecker(["update"])
+
+require_view_mat = PermissionChecker(["view", "view_materia_prima"])
 
 router = APIRouter()
 
@@ -24,7 +27,7 @@ async def register_materia_p(data: materia_p, db: AsyncSession = Depends(get_aud
     return {"message": f"¡{register.tipo_material} Registrado con exito!", "status": "success"}
 
 @router.get("/materia_prima", response_model=list[matResponse])
-async def obtener_materia_p(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+async def obtener_materia_p(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view_mat)):
     mat = await obt_materia_p(db)
     if not mat:
             raise HTTPException(status_code=400, detail="no se encontraron materias primas")

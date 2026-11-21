@@ -10,7 +10,10 @@ from src.core.checker import PermissionChecker
 require_create = PermissionChecker(["crear"])
 require_delete = PermissionChecker(["delete"])
 require_view = PermissionChecker(["view"])
+require_view_productos = PermissionChecker(["view_productos"])
 require_update = PermissionChecker(["update"])
+
+require_view_pro = PermissionChecker(["view", "view_productos"])
 
 router = APIRouter()
 
@@ -24,7 +27,7 @@ async def register_producto(data: producto, db: AsyncSession = Depends(get_audit
     return {"message": f"¡{register.nombre_p} Registrado con exito!", "status": "success"}
 
 @router.get("/producto", response_model=list[proResponse])
-async def obtener_producto(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
+async def obtener_producto(db: AsyncSession = Depends(get_audited_db), user = Depends(require_view_pro)):
     pro = await obt_productos(db)
     if not pro:
             raise HTTPException(status_code=400, detail="no se ha encontrado el producto")
