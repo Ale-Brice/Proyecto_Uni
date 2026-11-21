@@ -3,7 +3,6 @@ import pandas as pd
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Importa tu sesión y tus funciones CRUD existentes
 from src.db.session import get_db
 from src.crud.gastos import obt_cost_adm_mes, obt_cost_op_mes, obt_materia_p_mes
 from src.crud.ventas import obt_ventas_mes
@@ -12,13 +11,11 @@ router = APIRouter()
 
 @router.get("/reporte-mensual-excel/{year}/{month}")
 async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depends(get_db)):
-    # 1. Ejecutar las mismas consultas a la BD que ya tienes
     admin_costs = await obt_cost_adm_mes(db, year, month)
     oper_costs = await obt_cost_op_mes(db, year, month)
     materias = await obt_materia_p_mes(db, year, month)
     ventas_mes = await obt_ventas_mes(db, year, month)
 
-    # 2. Calcular totales (convertimos a float para evitar conflictos de tipo Decimal en Excel)
     total_adm = float(sum(c.gasto_administrativo for c in admin_costs))
     total_op = float(sum(c.gasto_operativo for c in oper_costs))
     total_mat = float(sum((m.precio_mat * m.cantidad) for m in materias))
@@ -27,9 +24,6 @@ async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depend
     gran_total_gastos = total_adm + total_op + total_mat
     ganancia_neta = total_ingresos - gran_total_gastos
 
-    # 3. Construir los DataFrames de Pandas para cada pestaña
-    
-    # Pestaña 1: Resumen
     df_resumen = pd.DataFrame([
         {"Concepto": "Total Ingresos (Ventas)", "Monto ($)": total_ingresos},
         {"Concepto": "Gastos Administrativos", "Monto ($)": total_adm},
@@ -39,7 +33,6 @@ async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depend
         {"Concepto": "GANANCIA NETA", "Monto ($)": ganancia_neta},
     ])
 
-    # Pestaña 2: Gastos Administrativos
     df_adm = pd.DataFrame([
         {
             "Fecha": c.fecha,
@@ -48,7 +41,6 @@ async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depend
         } for c in admin_costs
     ])
 
-    # Pestaña 3: Gastos Operativos
     df_op = pd.DataFrame([
         {
             "Fecha": c.fecha,
@@ -57,7 +49,6 @@ async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depend
         } for c in oper_costs
     ])
 
-    # Pestaña 4: Materia Prima
     df_mat = pd.DataFrame([
         {
             "Fecha": m.fecha,
@@ -68,7 +59,6 @@ async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depend
         } for m in materias
     ])
 
-    # Pestaña 5: Ventas
     df_ventas = pd.DataFrame([
         {
             "Fecha": v.fecha,
@@ -79,7 +69,6 @@ async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depend
         } for v in ventas_mes
     ])
 
-    # 4. Escribir todo en un buffer en memoria (BytesIO) usando openpyxl
     buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
         df_resumen.to_excel(writer, sheet_name="Resumen Financiero", index=False)
@@ -94,7 +83,6 @@ async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depend
         if not df_ventas.empty:
             df_ventas.to_excel(writer, sheet_name="Ventas", index=False)
 
-        # (Opcional) Autoajustar el ancho de las columnas para que no se corten los textos
         for sheet_name in writer.sheets:
             worksheet = writer.sheets[sheet_name]
             for col in worksheet.columns:
@@ -105,10 +93,8 @@ async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depend
                         max_length = max(max_length, len(str(cell.value)))
                 worksheet.column_dimensions[column_letter].width = max_length + 4
 
-    # Regresar el puntero del buffer al inicio
     buffer.seek(0)
 
-    # 5. Retornar el archivo Excel como descarga directa
     headers = {
         "Content-Disposition": f'attachment; filename="reporte_financiero_{year}_{month}.xlsx"'
     }

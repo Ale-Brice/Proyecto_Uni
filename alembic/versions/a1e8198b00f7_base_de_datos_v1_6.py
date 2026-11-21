@@ -19,7 +19,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-# Sentencia 1: Crear la tabla
     op.execute("""
         CREATE TABLE audit_log (
             id SERIAL PRIMARY KEY,
@@ -32,13 +31,10 @@ def upgrade() -> None:
         );
     """)
 
-    # Sentencia 2: Primer índice
     op.execute("CREATE INDEX ix_audit_log_table_name ON audit_log (table_name);")
 
-    # Sentencia 3: Segundo índice
     op.execute("CREATE INDEX ix_audit_log_changed_by ON audit_log (changed_by);")
 
-    # Sentencia 4: La función del trigger (cuenta como 1 sentencia)
     op.execute("""
         CREATE OR REPLACE FUNCTION audit_trigger_func()
         RETURNS TRIGGER AS $$
@@ -65,7 +61,6 @@ def upgrade() -> None:
         $$ LANGUAGE plpgsql;
     """)
 
-    # Sentencia 5: El bloque DO $$ que recorre todas las tablas (cuenta como 1 sentencia)
     op.execute("""
         DO $$
         DECLARE
@@ -94,7 +89,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-# 1. Eliminar todos los triggers de auditoría dinámicamente
     op.execute("""
         DO $$
         DECLARE
@@ -113,8 +107,6 @@ def downgrade() -> None:
         $$;
     """)
 
-    # 2. Eliminar función
     op.execute("DROP FUNCTION IF EXISTS audit_trigger_func();")
 
-    # 3. Eliminar tabla audit_log
     op.execute("DROP TABLE IF EXISTS audit_log;")
