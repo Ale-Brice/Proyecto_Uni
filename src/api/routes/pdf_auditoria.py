@@ -5,6 +5,10 @@ from weasyprint import HTML
 from src.db.session import get_db
 from src.crud.pdf_audit import obt_audit_log_mes
 from zoneinfo import ZoneInfo
+from src.core.audit import get_audited_db
+from src.core.checker import PermissionChecker
+
+require_view = PermissionChecker(["view"])
 
 router = APIRouter()
 
@@ -107,7 +111,7 @@ AUDIT_HTML_TEMPLATE = """
 """
 
 @router.get("/reporte-auditoria/{year}/{month}", response_class=Response)
-async def generar_reporte_auditoria(year: int, month: int, db: AsyncSession = Depends(get_db)):
+async def generar_reporte_auditoria(year: int, month: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     audit_logs = await obt_audit_log_mes(db, year, month)
     tz_local = ZoneInfo("America/Caracas")
     logs_formateados = []

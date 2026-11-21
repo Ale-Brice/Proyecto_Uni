@@ -1,16 +1,19 @@
 from io import BytesIO
 import pandas as pd
 from fastapi import APIRouter, Depends, Response
+from src.core.checker import PermissionChecker
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.session import get_db
+from src.core.audit import get_audited_db
 from src.crud.gastos import obt_cost_adm_mes, obt_cost_op_mes, obt_materia_p_mes
 from src.crud.ventas import obt_ventas_mes
+
+require_view = PermissionChecker(["view"])
 
 router = APIRouter()
 
 @router.get("/reporte-mensual-excel/{year}/{month}")
-async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depends(get_db)):
+async def generar_reporte_excel(year: int, month: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
     admin_costs = await obt_cost_adm_mes(db, year, month)
     oper_costs = await obt_cost_op_mes(db, year, month)
     materias = await obt_materia_p_mes(db, year, month)

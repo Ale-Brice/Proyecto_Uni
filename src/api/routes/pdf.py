@@ -9,11 +9,15 @@ from src.crud.gastos import obt_materia_p_mes
 from src.db.session import get_db
 from src.crud.ventas import obt_ventas_mes
 from src.db.base import cost_adm, cost_op, materia_p
+from src.core.audit import get_audited_db
+from src.core.checker import PermissionChecker
+
+require_view = PermissionChecker(["view"])
 
 router = APIRouter()
 
 @router.get("/reporte-mensual/{year}/{month}")
-async def generar_reporte_mensual(year: int, month: int, db: AsyncSession = Depends(get_db)):
+async def generar_reporte_mensual(year: int, month: int, db: AsyncSession = Depends(get_audited_db), user = Depends(require_view)):
 
     admin_costs = await obt_cost_adm_mes(db, year, month)
     oper_costs = await obt_cost_op_mes(db, year, month)
